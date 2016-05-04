@@ -22,6 +22,7 @@ import Constant
 import Types
 import Logger
 import Cron
+import Application (cliperApp)
 
 app :: ServerApp
 app pend =
@@ -53,7 +54,7 @@ main = do
     void $ forkIO $ clearTokenCron
     Warp.runSettings (Warp.setPort 4564 Warp.defaultSettings) $ logger
         $ WaiWs.websocketsOr defaultConnectionOptions
-            app defaultApp
+            app cliperApp
 
 customLogger :: IO Middleware
 customLogger = mkRequestLogger def {outputFormat = Apache FromSocket}

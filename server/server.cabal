@@ -23,6 +23,8 @@ library
                      , Constant
                      , Logger
                      , Cron
+                     , Application
+>>>>>>> start working on website
   build-depends:       base >= 4.7 && < 5
                      , text
                      , bytestring
@@ -36,6 +38,11 @@ library
                      , random
                      , unordered-containers
                      , time
+                     , servant-server
+                     , servant-blaze
+                     , shakespeare
+                     , blaze-html
+                     , wai
   default-language:    Haskell2010
 
 executable cliperServer
