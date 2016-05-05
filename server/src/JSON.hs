@@ -58,10 +58,18 @@ instance FromJSON JSyncAck where
                  <*> o .: "status"
 
 data JLogout = JLogout {
-    jltoken :: Text
+    jltoken :: Token
     -- TODO: reason :: Text
 } deriving (Show)
 
 instance FromJSON JLogout where
     parseJSON = withObject "logout" $ \o ->
         JLogout <$> o .: "token"
+
+data JPing = JPing {
+    jpingtoken :: Token
+} deriving (Show)
+
+instance FromJSON JPing where
+    parseJSON = withObject "ping" $ \o ->
+        JPing <$> o .: "token"

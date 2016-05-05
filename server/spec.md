@@ -198,14 +198,20 @@ all the message related to that token.
 **/ping**
 
 client:
+```json
+	{
+		"token":"previously got token"
+	}
 ```
-anything
-```
-then server send back the same thing.
+then server send back **ack** when success
 server:
+```json
+	{
+		"code": "200"
+		"msg": "ack"
+	}
 ```
-anything
-```
+`400` or `422` when on error, which is explained in msg.
 
 --------------------------------------------------------------------------------
 

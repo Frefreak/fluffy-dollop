@@ -161,8 +161,9 @@ with server afterwards.</p>
         <span class="pl-s"><span class="pl-pds">"</span>(optional)time<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>message time, (maybe added later)<span class="pl-pds">"</span></span>
     }</pre></div>
 
-<p>then, if the client received the message, send an ACK:
-client:</p>
+<p>then, if the client received the message, send an ACK:</p>
+
+<p>client:</p>
 
 <div class="highlight highlight-source-json"><pre>    {
         <span class="pl-s"><span class="pl-pds">"</span>msgid<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>received msg id<span class="pl-pds">"</span></span>,
@@ -193,13 +194,17 @@ connect back, then send the remaining message.</p>
         <span class="pl-s"><span class="pl-pds">"</span>(optional)reason<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>reason, (maybe added later)<span class="pl-pds">"</span></span>
     }</pre></div>
 
-<p>then server send back an ack.
-server:</p>
+<p>then server send back an ack.</p>
+
+<p>server:</p>
 
 <div class="highlight highlight-source-json"><pre>    {
         <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>200<span class="pl-pds">"</span></span>
-    } on success or
-    {
+    }</pre></div>
+
+<p>on success or</p>
+
+<div class="highlight highlight-source-json"><pre>    {
         <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>400<span class="pl-pds">"</span></span>,
         <span class="pl-s"><span class="pl-pds">"</span>msg<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>bad request<span class="pl-pds">"</span></span>
     }</pre></div>
@@ -218,14 +223,19 @@ all the message related to that token.</p>
 
 <p>client:</p>
 
-<pre><code>anything
-</code></pre>
+<div class="highlight highlight-source-json"><pre>    {
+        <span class="pl-s"><span class="pl-pds">"</span>token<span class="pl-pds">"</span></span>:<span class="pl-s"><span class="pl-pds">"</span>previously got token<span class="pl-pds">"</span></span>
+    }</pre></div>
 
-<p>then server send back the same thing.
+<p>then server send back <strong>ack</strong> when success
 server:</p>
 
-<pre><code>anything
-</code></pre>
+<div class="highlight highlight-source-json"><pre>    {
+        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>200<span class="pl-pds">"</span></span>
+        <span class="pl-s"><span class="pl-pds">"</span>msg<span class="pl-pds">"</span></span><span class="pl-ii">:</span> <span class="pl-s"><span class="pl-pds">"</span>ack<span class="pl-pds">"</span></span>
+    }</pre></div>
+
+<p><code>400</code> or <code>422</code> when on error, which is explained in msg.</p>
 
 <hr>
 

@@ -8,13 +8,13 @@ import qualified Data.ByteString.Lazy.Char8 as LBS
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Text as T
 import GHC.Generics
-import Control.Lens ((^.))
+import Control.Lens ((^.), (^?!))
 import Control.Concurrent
 import Control.Exception
 import Control.Monad
 import System.IO.Error
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
-import Data.Aeson.Lens (key, _String)
+import Data.Aeson.Lens (key, _String, _Number)
 import Data.Monoid
 import System.IO
 import System.Timeout
@@ -93,28 +93,33 @@ appSync conf conn = do
     resp <- receiveData conn
     processResp resp "Sync" $ void $
         -- forkPingThread conn 240 -- server will send ping frame
-        concurrently (syncLoop conn log) (pingLoop conn 240 conf)
+        concurrently (syncLoop conn log) (pingLoop conn 240 conf tok)
 
-appPing :: ClientApp Bool
-appPing conn = do
-    sendTextData conn ("ping" :: T.Text)
+appPing :: Token -> ClientApp Bool
+appPing tok conn = do
+    let v = object ["token" .= tok]
+    sendTextData conn $ encode v
     result <- timeout 5000000 $ receiveData conn
-    case result of
+    case result :: Maybe LBS.ByteString of
         Nothing -> return False
-        Just t -> if t == ("ping" :: T.Text) then return True else
-                    error "this is really a big surprise!!! BUG AGAIN!"
+        Just t -> do
+            if t ^?! key "code" . _Number == 200 then do
+                return True else do
+                TIO.putStrLn $ T.pack "ping" <> " failed, the server responded: "
+                    <> t ^. key "msg" . _String
+                return False
 
-exePing :: Configuration -> IO Bool
-exePing conf = do
+exePing :: Configuration -> Token -> IO Bool
+exePing conf tok = do
     let (ip, port, _, _) = getInfo conf
-    runClient  ip port "/ping" $ appPing
+    runClient  ip port "/ping" $ appPing tok
 
-pingLoop :: Connection -> Int -> Configuration -> IO ()
-pingLoop conn n conf = do
-    b <- exePing conf
+pingLoop :: Connection -> Int -> Configuration -> Token -> IO ()
+pingLoop conn n conf tok = do
+    b <- exePing conf tok
     when b $ do
             threadDelay (n * 1000000) -- default 4 min
-            pingLoop conn n conf
+            pingLoop conn n conf tok
 
 syncLoop :: Connection -> FilePath -> IO ()
 syncLoop conn log = do
