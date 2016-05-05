@@ -43,6 +43,8 @@ library
                      , shakespeare
                      , blaze-html
                      , wai
+                     , containers
+                     , exceptions
   default-language:    Haskell2010
 
 executable cliperServer
