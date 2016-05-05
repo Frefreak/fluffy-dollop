@@ -21,6 +21,7 @@ import Database
 import Constant
 import Types
 import Logger
+import Cron
 
 app :: MVar MessagePool -> ServerApp
 app mp pend =
@@ -54,6 +55,7 @@ main = do
         let t = tokenMapToken val
         modifyMVar_ msgPool (return . HM.insert t [])
     logger <- customLogger
+    void $ forkIO $ clearTokenCron msgPool
     Warp.runSettings (Warp.setPort 4564 Warp.defaultSettings) $ logger
         $ WaiWs.websocketsOr defaultConnectionOptions
             (app msgPool) defaultApp
