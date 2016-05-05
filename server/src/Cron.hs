@@ -9,6 +9,7 @@ import Control.Concurrent
 import Data.Text (Text)
 import Database.Persist
 import Database.Persist.Sqlite
+import Data.HashMap.Lazy (size)
 
 import Api
 import Types
@@ -31,6 +32,8 @@ checkAndErase msgp = do
         putStrLn $ show nFinished ++ "/" ++ show nAll ++
             " finished, this is very unlikely to happen!"
         putStrLn $ "time elapsed: " ++ show (diffUTCTime curr2 curr1)
+    act <- size <$> readMVar msgp
+    putStrLn $ "# of currently active tokens: " ++ show act
 
 -- inactiveTime's unit: second
 getInactiveToken :: Text -> NominalDiffTime -> IO [(Token, Key User)]
