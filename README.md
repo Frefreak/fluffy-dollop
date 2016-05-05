@@ -26,4 +26,5 @@ After you have successfully installed `stack`, run the following commands:
 - create a simple web interface on server side
 - polish simple web interface with some css
 - release some binary (probably try Travis CI for deploy apk)
-- create a simple chrome extension to right click and post to server.
+- create a simple chrome extension to right click and post to server (if have time).
+- change `ping` format which require token, so server can detect inactive token and erase it itself (similar to perform a `logout`)
