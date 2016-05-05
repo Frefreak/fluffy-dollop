@@ -12,6 +12,7 @@ import Database.Persist.TH
 import Database.Persist.Sql
 import Control.Monad.IO.Class (liftIO)
 import Data.Text (Text)
+import Data.Time.Clock
 
 import Constant
 import Types
@@ -34,5 +35,6 @@ TokenMap
     token   Token
     UniqueToken token
     user    UserId
+    lastseen UTCTime
     deriving Show
 |]
