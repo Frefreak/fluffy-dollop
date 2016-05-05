@@ -16,6 +16,7 @@ import qualified Data.HashMap.Lazy as HM
 import Control.Monad.IO.Class (liftIO)
 import System.Timeout
 import Data.Maybe (fromJust)
+import Data.Time.Clock
 
 import Crypto
 import JSON
@@ -95,10 +96,11 @@ performLoginAction conn jl msgp = do
         Nothing -> respondLoginMessage conn 422 "username / password mismatch" ""
 
 insertTokenDb :: Token -> Key User -> MVar MessagePool -> IO Bool
-insertTokenDb tok uid msgp =
+insertTokenDb tok uid msgp = do
+    cur <- getCurrentTime
     catch (
         runSqlite sqlTable $ do
-            insert $ TokenMap tok uid
+            insert $ TokenMap tok uid cur
             ts <- selectFirst [IdMapUser ==. uid] []
             case ts of
                 Nothing ->
