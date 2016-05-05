@@ -47,6 +47,9 @@ respondSyncErrorMessage = respondRegisterMessage
 respondSyncMessage :: Connection -> Scientific -> Text -> IO ()
 respondSyncMessage = respondSyncErrorMessage
 
+respondPingMessage :: Connection -> Scientific -> Text -> IO ()
+respondPingMessage = respondSyncMessage
+
 appRegister :: Connection -> IO ()
 appRegister conn = do
     d <- receiveData conn
@@ -184,12 +187,24 @@ appSync msgp conn = do
                 sendMessagesOfToken (jstoken js) msgp conn
             else respondSyncErrorMessage conn 422 "no such token"
 
-appPing :: Connection -> IO ()
-appPing = keepAlive
+appPing :: MVar MessagePool -> Connection -> IO ()
+appPing msgp conn = do
+    d <- receiveData conn
+    let jping = decode d
+    case jping of
+        Nothing -> logInvalidJson d >>
+            respondPingMessage conn 400 "bad request"
+        Just jp -> do
+            mp <- readMVar msgp
+            if jpingtoken jp `HM.member` mp then do
+                respondPingMessage conn 200 "ack"
+                updateDatabaseTimestamp $ jpingtoken jp
+            else respondPingMessage conn 422 "no such token"
 
-keepAlive :: Connection -> IO ()
-keepAlive conn =
-    (receiveData conn :: IO Text) >>= sendTextData conn
+updateDatabaseTimestamp :: Token -> IO ()
+updateDatabaseTimestamp token = do
+    cur <- getCurrentTime
+    runSqlite sqlTable $ updateWhere [TokenMapToken ==. token] [TokenMapLastseen =. cur]
 
 sendMessagesOfToken :: Token -> MVar MessagePool -> Connection -> IO ()
 sendMessagesOfToken token msgp conn = do

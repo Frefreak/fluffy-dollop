@@ -43,7 +43,7 @@ app mp pend =
             appSync mp conn
         "/ping" -> do
             conn <- acceptRequest pend
-            appPing conn
+            appPing mp conn
         _ -> logNoUrl pend >> rejectRequest pend ""
 
 main :: IO ()
