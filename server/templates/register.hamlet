@@ -2,4 +2,4 @@
   <head>
     <title>Register
   <body>
-    <h1>Hello #{username}
+    <h1> Hello

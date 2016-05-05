@@ -24,7 +24,6 @@ library
                      , Logger
                      , Cron
                      , Application
->>>>>>> start working on website
   build-depends:       base >= 4.7 && < 5
                      , text
                      , bytestring
@@ -45,6 +44,7 @@ library
                      , wai
                      , containers
                      , exceptions
+                     , either
   default-language:    Haskell2010
 
 executable cliperServer
