@@ -10,6 +10,7 @@ import Data.Text (Text)
 import Database.Persist
 import Database.Persist.Sqlite
 import Data.HashMap.Lazy (size)
+import System.IO
 
 import Api
 import Types
@@ -18,6 +19,8 @@ import Database
 
 checkAndErase :: MVar MessagePool -> IO ()
 checkAndErase msgp = do
+    hSetBuffering stdout NoBuffering
+    putStrLn $ replicate 80 '='
     putStrLn "performing cron task to erase inactive tokens..."
     curr1 <- getCurrentTime
     tups <- getInactiveToken sqlTable inactiveTimeToDelete
@@ -34,6 +37,8 @@ checkAndErase msgp = do
         putStrLn $ "time elapsed: " ++ show (diffUTCTime curr2 curr1)
     act <- size <$> readMVar msgp
     putStrLn $ "# of currently active tokens: " ++ show act
+    putStrLn $ replicate 80 '-'
+    hSetBuffering stdout LineBuffering
 
 -- inactiveTime's unit: second
 getInactiveToken :: Text -> NominalDiffTime -> IO [(Token, Key User)]
