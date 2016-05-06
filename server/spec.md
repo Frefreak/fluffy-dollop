@@ -23,8 +23,8 @@
 In the following json format, server-sent "code" are always of type Number.
 Things like 400/422 are merely used to represent multiple possible values.
 Also, this document may be out of date due to modification to the server code.
-If found inconsistency, checkout the code in [Api.hs](server/src/Api.hs) and 
-[JSON.hs](server/src/JSON.hs).
+If found inconsistency, checkout the code in [Api.hs](src/Api.hs) and 
+[JSON.hs](src/JSON.hs).
 
 ### REGISTER
 (server respond as soon as possible)
@@ -177,7 +177,7 @@ if the client don't managed to respond the desired json in time (currently
 after the server send his last message to tell what happended.
 If the json format is correct but the `msgid` is not the desired one (which
 should be rare), the message will be resend.
-[`Api.hs`](server/src/Api.hs#L209-L238)
+[`Api.hs`](src/Api.hs#L214-L242)
 		
 ~~It is the client's duty to start the ping frame (to keep the connection),~~
 The server will fork a ping thread for every sync client (after bind this

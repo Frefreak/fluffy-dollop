@@ -217,14 +217,14 @@ sendMessagesOfToken token conn = do
     msgs <- runSqlite sqlTable $ selectFirst [MessagePoolToken ==. token] []
     case msgs of
         Nothing -> return () -- very unlikely to happen
-        Just (Entity mid msgp) ->
-            if L.null (messagePoolMessage msgp) then do
+        Just (Entity mid msgp) -> do
+            let msgq = messagePoolMessage msgp
+            if L.null msgq then do
                 threadDelay 1000000
                 sendMessagesOfToken token conn
             else do
                 msgid <- genRandomMsgId
-                let msgq = messagePoolMessage msgp
-                    obj = object [ "msg" .= String (head msgq), "msgid" .= String msgid ]
+                let obj = object [ "msg" .= String (head msgq), "msgid" .= String msgid ]
                 sendTextData conn (encode obj)
                 d <- timeout 3000000 $ receiveData conn
                 let jsa' = decode <$> d
