@@ -32,18 +32,18 @@ app pend =
         "/login" -> do
             conn <- acceptRequest pend
             appLogin conn
-        {-"/post" -> do-}
-            {-conn <- acceptRequest pend-}
-            {-appPost mp conn-}
+        "/post" -> do
+            conn <- acceptRequest pend
+            appPost conn
         "/logout" -> do
             conn <- acceptRequest pend
             appLogout conn
-        {-"/sync" -> do-}
-            {-conn <- acceptRequest pend-}
-            {-appSync mp conn-}
-        {-"/ping" -> do-}
-            {-conn <- acceptRequest pend-}
-            {-appPing mp conn-}
+        "/sync" -> do
+            conn <- acceptRequest pend
+            appSync conn
+        "/ping" -> do
+            conn <- acceptRequest pend
+            appPing conn
         _ -> logNoUrl pend >> rejectRequest pend ""
 
 main :: IO ()

@@ -111,32 +111,36 @@ insertTokenDb tok uid = do
             return True) handler where
                 handler (SomeException _) = return False
 
-{-appPost :: MVar MessagePool -> Connection -> IO ()-}
-{-appPost msgPool conn = do-}
-    {-d <- receiveData conn-}
-    {-let jpost = decode d-}
-    {-case jpost of-}
-        {-Just jp -> performPostAction conn jp msgPool-}
-        {-Nothing -> logInvalidJson d >>-}
-            {-respondPostMessage conn 400 "bad request"-}
+appPost :: Connection -> IO ()
+appPost conn = do
+    d <- receiveData conn
+    let jpost = decode d
+    case jpost of
+        Just jp -> performPostAction conn jp
+        Nothing -> logInvalidJson d >>
+            respondPostMessage conn 400 "bad request"
 
-{-performPostAction :: Connection -> JPost -> MVar MessagePool -> IO ()-}
-{-performPostAction conn jp msgp = do-}
-    {-mtokenMap <- runSqlite sqlTable $ selectFirst [TokenMapToken ==. jptoken jp] []-}
-    {-case mtokenMap of-}
-        {-Just (Entity _ tokenmap) -> do-}
-            {-addMessageToToken (tokenMapUser tokenmap) (jptoken jp) (jpdata jp) msgp-}
-            {-respondPostMessage conn 200 ""-}
-        {-Nothing -> respondPostMessage conn 422 "no such token"-}
+performPostAction :: Connection -> JPost -> IO ()
+performPostAction conn jp = do
+    mtokenMap <- runSqlite sqlTable $ selectFirst [TokenMapToken ==. jptoken jp] []
+    case mtokenMap of
+        Just (Entity _ tokenmap) -> do
+            respondPostMessage conn 200 ""
+            addMessageToToken (tokenMapUser tokenmap) (jptoken jp) (jpdata jp)
+        Nothing -> respondPostMessage conn 422 "no such token"
 
-{-addMessageToToken :: Key User -> Token -> Text -> MVar MessagePool -> IO ()-}
-{-addMessageToToken uid token msg msgp = do-}
-    {-midmap <- runSqlite sqlTable $ selectFirst [IdMapUser ==. uid] []-}
-    {-case midmap of-}
-        {-Nothing -> error "OMG!!! BUGS!" -- this should not happen-}
-        {-Just (Entity _ (IdMap _ toks)) ->-}
-            {-forM_ (L.delete token toks) (\tok ->-}
-                {-modifyMVar_ msgp (return . HM.adjust (++[msg]) tok))-}
+addMessageToToken :: Key User -> Token -> Text -> IO ()
+addMessageToToken uid token msg = do
+    midmap <- runSqlite sqlTable $ selectFirst [IdMapUser ==. uid] []
+    case midmap of
+        Nothing -> error "OMG!!! BUGS!" -- this should not happen
+        Just (Entity _ (IdMap _ toks)) ->
+            forM_ (L.delete token toks) (\tok -> runSqlite sqlTable $ do
+                msgs <- selectFirst [MessagePoolToken ==. tok] []
+                case msgs of
+                    Nothing -> error "BUGS AGAIN!"
+                    Just (Entity _ msgs') -> updateWhere [MessagePoolToken ==. tok]
+                        [MessagePoolMessage =. messagePoolMessage msgs' ++ [msg]])
 
 appLogout :: Connection -> IO ()
 appLogout conn = do
@@ -170,67 +174,69 @@ deleteTokenDb tok uid =
                             return True) handler where
                         handler (SomeException _) = return False
 
-{-appSync :: MVar MessagePool -> Connection -> IO ()-}
-{-appSync msgp conn = do-}
-    {-d <- receiveData conn-}
-    {-let jsync = decode d-}
-    {-case jsync of-}
-        {-Nothing -> logInvalidJson d >>-}
-            {-respondSyncErrorMessage conn 400 "bad request"-}
-        {-Just js -> do-}
-            {-mp <- readMVar msgp-}
-            {-if jstoken js `HM.member` mp then do-}
-                {-respondSyncMessage conn 200 ""-}
-                {-forkPingThread conn 30-}
-                {-sendMessagesOfToken (jstoken js) msgp conn-}
-            {-else respondSyncErrorMessage conn 422 "no such token"-}
+appSync :: Connection -> IO ()
+appSync conn = do
+    d <- receiveData conn
+    let jsync = decode d
+    case jsync of
+        Nothing -> logInvalidJson d >>
+            respondSyncErrorMessage conn 400 "bad request"
+        Just js -> do
+            maybeToken <- runSqlite sqlTable $ selectFirst [TokenMapToken ==. jstoken js] []
+            case maybeToken of
+                Just _ -> do
+                    respondSyncMessage conn 200 ""
+                    forkPingThread conn 30
+                    sendMessagesOfToken (jstoken js) conn
+                Nothing -> respondSyncErrorMessage conn 422 "no such token"
 
-{-appPing :: MVar MessagePool -> Connection -> IO ()-}
-{-appPing msgp conn = do-}
-    {-d <- receiveData conn-}
-    {-let jping = decode d-}
-    {-case jping of-}
-        {-Nothing -> logInvalidJson d >>-}
-            {-respondPingMessage conn 400 "bad request"-}
-        {-Just jp -> do-}
-            {-mp <- readMVar msgp-}
-            {-if jpingtoken jp `HM.member` mp then do-}
-                {-respondPingMessage conn 200 "ack"-}
-                {-updateDatabaseTimestamp $ jpingtoken jp-}
-            {-else respondPingMessage conn 422 "no such token"-}
+appPing :: Connection -> IO ()
+appPing conn = do
+    d <- receiveData conn
+    let jping = decode d
+    case jping of
+        Nothing -> logInvalidJson d >>
+            respondPingMessage conn 400 "bad request"
+        Just jp -> do
+            maybeToken <- runSqlite sqlTable $ selectFirst [TokenMapToken ==. jpingtoken jp] []
+            case maybeToken of
+                Just _ -> do
+                    respondPingMessage conn 200 "ack"
+                    updateDatabaseTimestamp $ jpingtoken jp
+                Nothing ->
+                    respondPingMessage conn 422 "no such token"
 
-{-updateDatabaseTimestamp :: Token -> IO ()-}
-{-updateDatabaseTimestamp token = do-}
-    {-cur <- getCurrentTime-}
-    {-runSqlite sqlTable $ updateWhere [TokenMapToken ==. token] [TokenMapLastseen =. cur]-}
+updateDatabaseTimestamp :: Token -> IO ()
+updateDatabaseTimestamp token = do
+    cur <- getCurrentTime
+    runSqlite sqlTable $ updateWhere [TokenMapToken ==. token] [TokenMapLastseen =. cur]
 
-{-sendMessagesOfToken :: Token -> MVar MessagePool -> Connection -> IO ()-}
-{-sendMessagesOfToken token msgp conn = do-}
-    {-mp <- readMVar msgp-}
+sendMessagesOfToken :: Token -> Connection -> IO ()
+sendMessagesOfToken token conn = do
     {-let handler (PatternMatchFail _) = return Nothing-}
-    {-msgs' <- catch (return $ HM.lookup token mp) handler-}
-    {-case msgs' of-}
-        {-Nothing -> return ()-}
-        {-Just msgs ->-}
-            {-if L.null msgs then do-}
-                {-threadDelay 500000-}
-                {-sendMessagesOfToken token msgp conn-}
-            {-else do-}
-            {-msgid <- genRandomMsgId-}
-            {-let obj = object [ "msg" .= String (head msgs),-}
-                                {-"msgid" .= String msgid ]-}
-            {-sendTextData conn (encode obj)-}
-            {-d <- timeout 3000000 $ receiveData conn-}
-            {-let jsa' = decode <$> d-}
-            {-case jsa' of-}
-                {-Just (Just jsa) ->-}
-                    {-if jsamsgid jsa == msgid && jsastatus jsa == "ok" then do-}
-                        {-modifyMVar_ msgp (return . HM.adjust tail token)-}
-                        {-sendMessagesOfToken token msgp conn else-}
-                            {-sendMessagesOfToken token msgp conn-}
-                {-Just Nothing -> logInvalidJson (fromJust d) >>-}
-                                {-respondSyncErrorMessage conn 400-}
-                                {-"you don't know how to respond to my message!"-}
-                {-Nothing -> respondSyncErrorMessage conn 400-}
-                                {-"you don't even know you should respond to my message!"-}
+    msgs <- runSqlite sqlTable $ selectFirst [MessagePoolToken ==. token] []
+    case msgs of
+        Nothing -> return () -- very unlikely to happen
+        Just (Entity mid msgp) ->
+            if L.null (messagePoolMessage msgp) then do
+                threadDelay 1000000
+                sendMessagesOfToken token conn
+            else do
+                msgid <- genRandomMsgId
+                let msgq = messagePoolMessage msgp
+                    obj = object [ "msg" .= String (head msgq), "msgid" .= String msgid ]
+                sendTextData conn (encode obj)
+                d <- timeout 3000000 $ receiveData conn
+                let jsa' = decode <$> d
+                case jsa' of
+                    Just (Just jsa) ->
+                        if jsamsgid jsa == msgid && jsastatus jsa == "ok" then do
+                            runSqlite sqlTable $ update mid [MessagePoolMessage =. tail msgq]
+                            sendMessagesOfToken token conn else
+                                sendMessagesOfToken token conn
+                    Just Nothing -> logInvalidJson (fromJust d) >>
+                                    respondSyncErrorMessage conn 400
+                                    "you don't know how to respond to my message!"
+                    Nothing -> respondSyncErrorMessage conn 400
+                                    "you don't even know you should respond to my message!"
 

@@ -4,7 +4,7 @@
 
 <ul>
 <li>
-<p>user</p>
+<p><code>user</code></p>
 
 <ul>
 <li>uid       Integer</li>
@@ -14,7 +14,7 @@
 </ul>
 </li>
 <li>
-<p>token_map</p>
+<p><code>token_map</code></p>
 
 <ul>
 <li>token     hex string, used for uniquely identify client</li>
@@ -22,11 +22,19 @@
 </ul>
 </li>
 <li>
-<p>id_map</p>
+<p><code>id_map</code></p>
 
 <ul>
 <li>uid       Integer, user id</li>
 <li>[token]   hex string, same meaning as above</li>
+</ul>
+</li>
+<li>
+<p><code>message_pool</code></p>
+
+<ul>
+<li>token     hex string, used for uniquely identify client</li>
+<li>[Text]    store messages to be send to this token (encrypt later)</li>
 </ul>
 </li>
 </ul>
@@ -35,6 +43,12 @@
 <a id="user-content-api" class="anchor" href="#api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API</h2>
 
 <hr>
+
+<p>In the following json format, server-sent "code" are always of type Number.
+Things like 400/422 are merely used to represent multiple possible values.
+Also, this document may be out of date due to modification to the server code.
+If found inconsistency, checkout the code in <a href="server/src/Api.hs">Api.hs</a> and 
+<a href="server/src/JSON.hs">JSON.hs</a>.</p>
 
 <h3>
 <a id="user-content-register" class="anchor" href="#register" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>REGISTER</h3>
@@ -54,14 +68,14 @@
 token is generated from username and password. and respond.</p>
 
 <div class="highlight highlight-source-json"><pre>    {
-        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>200<span class="pl-pds">"</span></span>,
+        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-c1">200</span>,
         <span class="pl-s"><span class="pl-pds">"</span>msg<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>
     }</pre></div>
 
 <p>on success,</p>
 
 <div class="highlight highlight-source-json"><pre>    {
-        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>400, 422<span class="pl-pds">"</span></span>,
+        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-c1">400</span><span class="pl-ii">/</span><span class="pl-c1">422</span>,
         <span class="pl-s"><span class="pl-pds">"</span>msg<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>bad request, or username already existed<span class="pl-pds">"</span></span>
     }</pre></div>
 
@@ -87,7 +101,7 @@ token is generated from username and password. and respond.</p>
 <p>server: autheticate by querying database, return</p>
 
 <div class="highlight highlight-source-json"><pre>    {
-        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>200<span class="pl-pds">"</span></span>,
+        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-c1">200</span>,
         <span class="pl-s"><span class="pl-pds">"</span>token<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>aes encrypted token(possibly base64'ed)<span class="pl-pds">"</span></span>,
         <span class="pl-s"><span class="pl-pds">"</span>msg<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>
     }</pre></div>
@@ -95,7 +109,7 @@ token is generated from username and password. and respond.</p>
 <p>on success,</p>
 
 <div class="highlight highlight-source-json"><pre>    {
-        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>400, 422<span class="pl-pds">"</span></span>,
+        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-c1">400</span><span class="pl-ii">/</span><span class="pl-c1">422</span>,
         <span class="pl-s"><span class="pl-pds">"</span>msg<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>bad request or wrong username/pwd<span class="pl-pds">"</span></span>
     }</pre></div>
 
@@ -127,14 +141,14 @@ with server afterwards.</p>
 <p>server: server add data to message queue which is to be send</p>
 
 <div class="highlight highlight-source-json"><pre>    {
-        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>200<span class="pl-pds">"</span></span>,
+        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-c1">200</span>,
         <span class="pl-s"><span class="pl-pds">"</span>msg<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>
     }</pre></div>
 
 <p>on success or</p>
 
 <div class="highlight highlight-source-json"><pre>    {
-        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>400<span class="pl-pds">"</span></span>,
+        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-c1">400</span>,
         <span class="pl-s"><span class="pl-pds">"</span>msg<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>bad request, etc<span class="pl-pds">"</span></span>
     }</pre></div>
 
@@ -143,7 +157,8 @@ with server afterwards.</p>
 <h3>
 <a id="user-content-sync" class="anchor" href="#sync" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SYNC</h3>
 
-<p>(server hold the connection, send back message whenever the message queue is not empty)</p>
+<p>(server hold the connection, send back message whenever the message queue
+is not empty.)</p>
 
 <p><strong>/sync</strong></p>
 
@@ -153,15 +168,24 @@ with server afterwards.</p>
         <span class="pl-s"><span class="pl-pds">"</span>token<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>previously gotten token(RSA)<span class="pl-pds">"</span></span>
     }</pre></div>
 
+<p>if the token validated:
+server:</p>
+
+<div class="highlight highlight-source-json"><pre>    {
+        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-c1">200</span>,
+        <span class="pl-s"><span class="pl-pds">"</span>msg<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>
+    }</pre></div>
+
+<p>then the connection is <strong>not</strong> closed.</p>
+
 <p>server: when there's new message, send that to client</p>
 
 <div class="highlight highlight-source-json"><pre>    {
         <span class="pl-s"><span class="pl-pds">"</span>msg<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>aes encrypted message, (AES and base64)<span class="pl-pds">"</span></span>,
-        <span class="pl-s"><span class="pl-pds">"</span>msgid<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>a number indicating the msg id, (AES and base64)<span class="pl-pds">"</span></span>,
-        <span class="pl-s"><span class="pl-pds">"</span>(optional)time<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>message time, (maybe added later)<span class="pl-pds">"</span></span>
+        <span class="pl-s"><span class="pl-pds">"</span>msgid<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>a random string indicating the msg id, (AES and base64)<span class="pl-pds">"</span></span>
     }</pre></div>
 
-<p>then, if the client received the message, send an ACK:</p>
+<p>then, if the client received the message, send back an ACK:</p>
 
 <p>client:</p>
 
@@ -171,12 +195,21 @@ with server afterwards.</p>
     }</pre></div>
 
 <p>after the server gets this ack, it deleted the msg stored and proceed 
-to the next one(wait when msg queue empty)</p>
+to the next one(wait when msg queue empty)
+if the client don't managed to respond the desired json in time (currently
+3 second) or the responded json fail to be decoded, connection will be closed
+after the server send his last message to tell what happended.
+If the json format is correct but the <code>msgid</code> is not the desired one (which
+should be rare), the message will be resend.
+<a href="server/src/Api.hs#L209-L238"><code>Api.hs</code></a></p>
 
-<p>It is the client's duty to start the ping frame (to keep the connection),
-and reconnect whenever it detects disconnect. When a disconnect happens,
-the server will keep the unsend message and wait for the same token to
-connect back, then send the remaining message.</p>
+<p><del>It is the client's duty to start the ping frame (to keep the connection),</del>
+The server will fork a ping thread for every sync client (after bind this
+websockets app to <code>wai</code>, it must do so or the warp reaper will terminate
+this connection itself) and reconnect whenever it detects disconnect. 
+Server will only delete the message after receiving the correct <code>msgid</code> or the
+unsend message will be kept.  The message are now stored on database,
+table <code>message_pool</code>.</p>
 
 <hr>
 
@@ -199,13 +232,13 @@ connect back, then send the remaining message.</p>
 <p>server:</p>
 
 <div class="highlight highlight-source-json"><pre>    {
-        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>200<span class="pl-pds">"</span></span>
+        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-c1">200</span>
     }</pre></div>
 
 <p>on success or</p>
 
 <div class="highlight highlight-source-json"><pre>    {
-        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>400<span class="pl-pds">"</span></span>,
+        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-c1">400</span>,
         <span class="pl-s"><span class="pl-pds">"</span>msg<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>bad request<span class="pl-pds">"</span></span>
     }</pre></div>
 
@@ -231,22 +264,10 @@ all the message related to that token.</p>
 server:</p>
 
 <div class="highlight highlight-source-json"><pre>    {
-        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>200<span class="pl-pds">"</span></span>
-        <span class="pl-s"><span class="pl-pds">"</span>msg<span class="pl-pds">"</span></span><span class="pl-ii">:</span> <span class="pl-s"><span class="pl-pds">"</span>ack<span class="pl-pds">"</span></span>
+        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-c1">200</span>,
+        <span class="pl-s"><span class="pl-pds">"</span>msg<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>ack<span class="pl-pds">"</span></span>
     }</pre></div>
 
-<p><code>400</code> or <code>422</code> when on error, which is explained in msg.</p>
-
-<hr>
-
-<h2>
-<a id="user-content-datatypes" class="anchor" href="#datatypes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>datatypes</h2>
-
-<ul>
-<li>
-<code>Map token MessageQueue</code> -&gt; memory as MVar</li>
-</ul>
-
-<p>so when the server restart, all messages lost, but tokens is restored</p>
+<p><code>400</code> or <code>422</code> when on error, which is explained in msg. (similar to above)</p>
 </article></div></div></div></div><script>
 $("span[class='octicon octicon-link']").replaceWith('<svg aria-hidden="true" class="octicon octicon-link" height="16" role="img" version="1.1" viewBox="0 0 16 16" width="16"><path d="M4 9h1v1h-1c-1.5 0-3-1.69-3-3.5s1.55-3.5 3-3.5h4c1.45 0 3 1.69 3 3.5 0 1.41-0.91 2.72-2 3.25v-1.16c0.58-0.45 1-1.27 1-2.09 0-1.28-1.02-2.5-2-2.5H4c-0.98 0-2 1.22-2 2.5s1 2.5 2 2.5z m9-3h-1v1h1c1 0 2 1.22 2 2.5s-1.02 2.5-2 2.5H9c-0.98 0-2-1.22-2-2.5 0-0.83 0.42-1.64 1-2.09v-1.16c-1.09 0.53-2 1.84-2 3.25 0 1.81 1.55 3.5 3 3.5h4c1.45 0 3-1.69 3-3.5s-1.5-3.5-3-3.5z"></path></svg>')</script></body></html>
