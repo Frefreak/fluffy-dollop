@@ -37,4 +37,8 @@ TokenMap
     user    UserId
     lastseen UTCTime
     deriving Show
+
+MessagePool
+    token   Token
+    message MessageQueue
 |]

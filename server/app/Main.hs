@@ -23,42 +23,37 @@ import Types
 import Logger
 import Cron
 
-app :: MVar MessagePool -> ServerApp
-app mp pend =
+app :: ServerApp
+app pend =
     case requestPath $ pendingRequest pend of
         "/register" -> do
             conn <- acceptRequest pend
             appRegister conn
         "/login" -> do
             conn <- acceptRequest pend
-            appLogin mp conn
-        "/post" -> do
-            conn <- acceptRequest pend
-            appPost mp conn
+            appLogin conn
+        {-"/post" -> do-}
+            {-conn <- acceptRequest pend-}
+            {-appPost mp conn-}
         "/logout" -> do
             conn <- acceptRequest pend
-            appLogout mp conn
-        "/sync" -> do
-            conn <- acceptRequest pend
-            appSync mp conn
-        "/ping" -> do
-            conn <- acceptRequest pend
-            appPing mp conn
+            appLogout conn
+        {-"/sync" -> do-}
+            {-conn <- acceptRequest pend-}
+            {-appSync mp conn-}
+        {-"/ping" -> do-}
+            {-conn <- acceptRequest pend-}
+            {-appPing mp conn-}
         _ -> logNoUrl pend >> rejectRequest pend ""
 
 main :: IO ()
 main = do
     runSqlite sqlTable (runMigration migrateAll)
-    msgPool <- newMVar (empty :: MessagePool)
-    results <- runSqlite sqlTable $ selectList ([] :: [Filter TokenMap]) []
-    forM_ results $ \(Entity _ val) -> do
-        let t = tokenMapToken val
-        modifyMVar_ msgPool (return . HM.insert t [])
     logger <- customLogger
-    void $ forkIO $ clearTokenCron msgPool
+    void $ forkIO $ clearTokenCron
     Warp.runSettings (Warp.setPort 4564 Warp.defaultSettings) $ logger
         $ WaiWs.websocketsOr defaultConnectionOptions
-            (app msgPool) defaultApp
+            app defaultApp
 
 customLogger :: IO Middleware
 customLogger = mkRequestLogger def {outputFormat = Apache FromSocket}

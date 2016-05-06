@@ -17,14 +17,14 @@ import Types
 import Constant
 import Database
 
-checkAndErase :: MVar MessagePool -> IO ()
-checkAndErase msgp = do
+checkAndErase :: IO ()
+checkAndErase = do
     hSetBuffering stdout NoBuffering
     putStrLn $ replicate 80 '='
     putStrLn "performing cron task to erase inactive tokens..."
     curr1 <- getCurrentTime
     tups <- getInactiveToken sqlTable inactiveTimeToDelete
-    res <- forM tups $ \(tok, uid) -> deleteTokenDb tok uid msgp
+    res <- forM tups $ \(tok, uid) -> deleteTokenDb tok uid
     let nAll = length tups
         nFinished = length $ filter id res
     curr2 <- getCurrentTime
@@ -35,8 +35,8 @@ checkAndErase msgp = do
         putStrLn $ show nFinished ++ "/" ++ show nAll ++
             " finished, this is very unlikely to happen!"
         putStrLn $ "time elapsed: " ++ show (diffUTCTime curr2 curr1)
-    act <- size <$> readMVar msgp
-    putStrLn $ "# of currently active tokens: " ++ show act
+    act :: [Entity MessagePool] <- runSqlite sqlTable $ selectList [] []
+    putStrLn $ "# of currently active tokens: " ++ show (length act)
     putStrLn $ replicate 80 '-'
     hSetBuffering stdout LineBuffering
 
@@ -49,11 +49,7 @@ getInactiveToken tableName inactiveTime = do
             diffUTCTime cur (tokenMapLastseen tkm) > inactiveTime) allTokens
     return $ map (\(Entity tid tkm) -> (tokenMapToken tkm, tokenMapUser tkm)) inactive
 
-test = do
-    (allTokens :: [Entity TokenMap]) <- runSqlite sqlTable $ selectList [] []
-    print allTokens
-
-clearTokenCron :: MVar MessagePool -> IO ()
-clearTokenCron msgp = forever $ do
-    checkAndErase msgp
+clearTokenCron :: IO ()
+clearTokenCron = forever $ do
+    checkAndErase
     threadDelay peroidToClean
