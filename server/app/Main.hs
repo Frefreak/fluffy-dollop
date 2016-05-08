@@ -51,7 +51,7 @@ main :: IO ()
 main = do
     runSqlite sqlTable (runMigration migrateAll)
     logger <- customLogger
-    void $ forkIO $ clearTokenCron
+    void $ forkIO clearTokenCron
     Warp.runSettings (Warp.setPort 4564 Warp.defaultSettings) $ logger
         $ WaiWs.websocketsOr defaultConnectionOptions
             app cliperApp

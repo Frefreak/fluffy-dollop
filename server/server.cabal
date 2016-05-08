@@ -24,6 +24,7 @@ library
                      , Logger
                      , Cron
                      , Application
+                     , Resource
   build-depends:       base >= 4.7 && < 5
                      , text
                      , bytestring

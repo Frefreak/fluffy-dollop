@@ -1,1 +1,7 @@
-<h1> Hi from home
+$doctype 5
+<html>
+  <head>
+    ^{headTemplate}
+    <title>Home
+  <body>
+    ^{homeRTemplate}

@@ -1,0 +1,47 @@
+<div .modal .fade #registerModal role=dialog aria-hidden=true>
+  <div .modal-dialog role=document>
+    <div .modal-content>
+      <div .modal-header>
+        <button type=button .close data-dismiss=modal aria-label=Close>
+          <span aria-hidden=true>&times;
+        <h4 .modal-title>Sign up
+      <div .modal-body>
+        <form action="/register">
+          <div .form-group .row>
+            <label .form-control-label .col-sm-2 for=signupusername>Username
+            <div .col-sm-10>
+              <input type=text .form-control #signupusername placeholder=Mr.Proper>
+          <div .form-group .row>
+            <label .form-control-label .col-sm-2 for=signuppassword>Password
+            <div .col-sm-10>
+              <input type=password .form-control #signuppassword>
+              <small .text-muted>Password will be MD5ed before sending to the #
+                \server
+          <div.form-group .row>
+            <div .col-sm-8 .col-sm-offset-4 .submitButtons>
+              <button type=submit .btn .btn-primary-outline>Submit
+              <button type=button .btn .btn-danger-outline data-dismiss=modal>Close
+
+<div .modal .fade #loginModal role=dialog aria-hidden=true>
+  <div .modal-dialog role=document>
+    <div .modal-content>
+      <div .modal-header>
+        <button type=button .close data-dismiss=modal aria-label=Close>
+          <span aria-hidden=true>&times;
+        <h4 .modal-title>Sign in
+      <div .modal-body>
+        <form action="/login">
+          <div .form-group .row>
+            <label .form-control-label .col-sm-2 for=signinusername>Username
+            <div .col-sm-10>
+              <input type=text .form-control #signinusername placeholder=Mr.Proper>
+          <div .form-group .row>
+            <label .form-control-label .col-sm-2 for=signinpassword>Password
+            <div .col-sm-10>
+              <input type=password .form-control #signinpassword>
+              <small .text-muted>Password will be MD5ed before sending to the #
+                \server
+          <div.form-group .row>
+            <div .col-sm-8 .col-sm-offset-4 .submitButtons>
+              <button type=submit .btn .btn-primary-outline>Submit
+              <button type=button .btn .btn-danger-outline data-dismiss=modal>Close
