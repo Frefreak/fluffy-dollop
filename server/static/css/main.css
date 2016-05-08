@@ -38,7 +38,7 @@
 }
 
 #lorem {
-	margin-top: 200px;
+	top: 40%;
 	color: lightblue;
 	padding: auto 0;
 	font-size: 20px;
@@ -62,3 +62,6 @@ footer {
 	padding-top: 8px;
 	background: #333333;
 }
+
+@media screen and (max-width: 768px) {
+
