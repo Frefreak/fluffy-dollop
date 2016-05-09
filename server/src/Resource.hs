@@ -12,13 +12,16 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Either
 import Servant
 
+import JSON
+
 type Handler = EitherT ServantErr IO
 
-homeTemplate = $(shamletFile "templates/home.hamlet")
-homeRTemplate = $(shamletFile "templates/homeR.hamlet")
+homeTemplate :: Maybe JWebAuth -> Html
+homeTemplate jr = $(shamletFile "templates/home.hamlet")
+
+homeRTemplate jr = $(shamletFile "templates/homeR.hamlet")
 headTemplate = $(shamletFile "templates/head.hamlet")
 navTemplate = $(shamletFile "templates/nav.hamlet")
 modalTemplate = $(shamletFile "templates/modal.hamlet")
 footerTemplate = $(shamletFile "templates/footer.hamlet")
-
 

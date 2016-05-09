@@ -2,7 +2,7 @@
   <button .navbar-toggler .hidden-sm-up .pull-xs-right style="color:#efefef"
   type=button data-toggle=collapse data-target=#navbarItems>&#9776;
   <div .collapse .navbar-toggleable-xs #navbarItems>
-    <a .navbar-brand href=#>
+    <a .navbar-brand href=/>
       <span .fa .fa-cog .fa-spin .fa-fw>
       Clipper
     <ul .nav .navbar-nav .pull-xs-right>

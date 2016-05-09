@@ -4,4 +4,4 @@ $doctype 5
     ^{headTemplate}
     <title>Home
   <body>
-    ^{homeRTemplate}
+    ^{homeRTemplate jr}

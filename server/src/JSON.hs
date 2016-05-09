@@ -1,12 +1,16 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
 module JSON where
 
 import Data.Aeson
 import GHC.Generics
 import Data.Text (Text)
+import Servant.API.ContentTypes
 
 import Types
+
+maybeToEither :: String -> Maybe a -> Either String a
+maybeToEither = flip maybe Right . Left
 
 data JRegister = JRegister {
     jrusername :: Text,
@@ -73,3 +77,14 @@ data JPing = JPing {
 instance FromJSON JPing where
     parseJSON = withObject "ping" $ \o ->
         JPing <$> o .: "token"
+
+data JWebAuth = JWebAuth {
+    jwausername :: Text,
+    jwapassword :: Text
+} deriving (Show, Generic)
+
+instance FromFormUrlEncoded JWebAuth where
+    fromFormUrlEncoded vals =
+        let jwa = JWebAuth <$> lookup "username" vals <*> lookup "password" vals
+        in maybeToEither "Invalid FormUrlEncoded Content." jwa
+

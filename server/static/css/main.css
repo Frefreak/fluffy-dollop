@@ -10,11 +10,10 @@
 	padding-top: 20px;
 	padding-bottom: 30px;
 	color: #f8ffff;
-	background: linear-gradient(to right, #19111f 0%,#2c1e37 100%);
 }
 
 .header {
-	background-image: linear-gradient(to right, rgb(25, 17, 31) 0%, rgb(44, 30, 55) 100%);
+	background: linear-gradient(to right, #19111f 0%,#2c1e37 100%);
 }
 
 .summary {
