@@ -52,6 +52,7 @@ loginPostServer jwa = do
             b <- liftIO $ insertTokenDb tok uid
             if b then redirect303WithToken "/" (encodeUtf8 tok)
                 else redirect303WithToken "/" ""
+        Nothing -> redirect303WithToken "/" ""
 
 registerPostServer :: J.JWebAuth -> Handler Html
 registerPostServer jwa = do
