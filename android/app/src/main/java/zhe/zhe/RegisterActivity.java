@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -28,11 +29,21 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.example.zhe.zhe.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import de.tavendo.autobahn.WebSocketConnection;
+import de.tavendo.autobahn.WebSocketException;
+import de.tavendo.autobahn.WebSocketHandler;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -63,6 +74,13 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+
+    //ljt
+    final String loginid = "ws://104.207.144.233:4564/login";
+    private final WebSocketConnection mConnection = new WebSocketConnection();
+    static String globaltoken ;
+    private final String tokenFile = "/cliper.token";
+    private final String sdcardPath = Environment.getExternalStorageDirectory().getPath();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,12 +212,12 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        return email.length() >= 3;
     }
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() >= 3;
     }
 
     /**
@@ -300,6 +318,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
         private final String mEmail;
         private final String mPassword;
+        boolean registoutput;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -311,6 +330,51 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             // TODO: attempt authentication against a network service.
 
             try {
+                mConnection.connect(loginid, new WebSocketHandler() {
+                    @Override
+                    public void onOpen() {
+                        JSONObject js = new JSONObject();
+                        try {
+                            js.put("username", mEmail);
+                            js.put("password", mPassword);
+                            js.put("deviceName", "Meizu");
+                        } catch (JSONException e) {
+                            Toast.makeText(getApplication(), "onOpenError", Toast.LENGTH_LONG).show();
+                        }
+                        mConnection.sendTextMessage(js.toString());
+                    }
+
+                    @Override
+                    public void onTextMessage(String payload) {
+                        try {
+                            JSONObject a = new JSONObject(payload);
+                            int registcode = a.getInt("code");
+                            String  registmsg = a.getString("msg");
+
+                            if (registcode != 200) {
+                                Toast.makeText(getApplication(), "registe failed" + " " + registmsg + " " + registcode, Toast.LENGTH_LONG).show();
+                                registoutput = false;
+                            }
+                            else {
+
+                                    Toast.makeText(getApplication(), "registe success" +" " +registcode, Toast.LENGTH_LONG).show();
+                                    registoutput = true ;
+                            }
+                        }
+                        catch (JSONException e) {Toast.makeText(getApplication(),"onTextMessageError", Toast.LENGTH_LONG).show();}
+                    }
+
+                    @Override
+                    public void onClose(int code, String reason) {
+                        //Log.d(TAG, "Connection lost.");
+                    }
+                });
+            } catch (WebSocketException e) {
+                Toast.makeText(getApplication(),"WebSocketError", Toast.LENGTH_LONG).show();
+            }
+
+
+            /*try {
                 // Simulate network access.
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -323,7 +387,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                     // Account exists, return true if the password matches.
                     return pieces[1].equals(mPassword);
                 }
-            }
+            }*/
 
             // TODO: register the new account here.
             return true;

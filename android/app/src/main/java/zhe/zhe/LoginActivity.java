@@ -28,13 +28,23 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import com.example.zhe.zhe.R;
-
 import static android.Manifest.permission.READ_CONTACTS;
+
+//ljt
+import de.tavendo.autobahn.WebSocketConnection;
+import de.tavendo.autobahn.WebSocketException;
+import de.tavendo.autobahn.WebSocketHandler;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
+import android.os.Environment;
+import android.widget.Toast;
+
 
 /**
  * A login screen that offers login via email/password.
@@ -63,6 +73,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+
+    //ljt
+    final String loginid = "ws://104.207.144.233:4564/login";
+    private final WebSocketConnection mConnection = new WebSocketConnection();
+    static String globaltoken ;
+    private final String tokenFile = "/cliper.token";
+    private final String sdcardPath = Environment.getExternalStorageDirectory().getPath();
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,7 +171,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     /**
-     * Attempts to sign in or register the account specified by the login form.
+     * Attempts to sign in or register theaa account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
@@ -164,6 +183,77 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
+
+        try {
+            mConnection.connect(loginid, new WebSocketHandler() {
+                @Override
+                public void onOpen() {
+                    JSONObject js = new JSONObject();
+                    try {
+                        js.put("username", mEmail);
+                        js.put("password", mPassword);
+                        js.put("deviceName", "Meizu");
+                    } catch (JSONException e) {
+                        Toast.makeText(getApplication(), "Errors in sending loginmsg.", Toast.LENGTH_LONG).show();
+                    }
+                    mConnection.sendTextMessage(js.toString());
+                }
+
+                @Override
+                public void onTextMessage(String payload) {
+                    JSONObject b = new JSONObject();
+                    try {
+                        JSONObject a = new JSONObject(payload);
+                        String msg = a.getString("msg");
+                        String temptoken = a.getString("token");
+                        int code = a.getInt("code");
+                        //These code are for protecting original token form covering by mistake login.
+                        //And if login success, a new sync service basic on new token will begin.
+                        if (temptoken  == null || temptoken.equals("")) {
+                            loginoutput = false;
+                            Toast.makeText(getApplication(), "login failed" + " " + msg + " " + code, Toast.LENGTH_LONG).show();
+                        }else {
+                            try {
+                                globaltoken = temptoken;
+                                b.put("token", globaltoken);
+                                PrintWriter writer = new PrintWriter(sdcardPath + tokenFile);
+                                writer.println(globaltoken);
+                                writer.close();
+                                Toast.makeText(getApplication(), "login successed" + " " + msg + " " + code, Toast.LENGTH_LONG).show();
+                                loginoutput = true;
+                            } catch (FileNotFoundException e) {
+                                Toast.makeText(getApplication(), "Errors in receiving msg", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    } catch (JSONException e) {
+                        Toast.makeText(getApplication(), "Errors in building receiving connnection", Toast.LENGTH_LONG).show();}
+
+                    mConnection.sendTextMessage(b.toString());
+                }
+
+                @Override
+                public void onClose(int code, String reason) {
+                    // Toast.makeText(getApplication(), "Connection lost", Toast.LENGTH_LONG).show();
+                }
+            });
+
+
+                /*try {
+                    // Simulate network access.
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    return false;
+                }*/
+
+            return loginoutput;
+        }
+        catch (WebSocketException e) {
+            Toast.makeText(getApplication(), "Errors in building connnection", Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+
+
 
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
@@ -184,7 +274,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
-        } else if (!isEmailValid(email)) {
+        } else if (!isUsernameValid(email)) {
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
@@ -203,14 +293,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    private boolean isEmailValid(String email) {
+    private boolean isUsernameValid(String username) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        return username.length() >= 3;
     }
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() >= 3;
     }
 
     /**
@@ -308,42 +398,36 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * the user.
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
         private final String mEmail;
         private final String mPassword;
+        private boolean loginoutput;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
             mPassword = password;
         }
 
+
+        //ljt
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
 
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
         }
+
 
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             showProgress(false);
+
+            try {
+                // Simulate network access.
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                ;
+            }
+
 
             if (success) {
                 finish();
@@ -352,6 +436,50 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 mPasswordView.requestFocus();
             }
         }
+
+
+
+       /* @Override
+        protected void onPostExecute( JSONObject loginJson) {
+            mAuthTask = null;
+            showProgress(false);
+
+            try {
+                String temptoken = loginJson.getString("token");
+
+                if (temptoken  == null || temptoken.equals("")) {
+                    ;
+                }else {
+                    try {
+                        globaltoken = temptoken;
+                        //b.put("token", globaltoken);
+                        PrintWriter writer = new PrintWriter(sdcardPath + tokenFile);
+                        writer.println(globaltoken);
+                        writer.close();
+                        Toast.makeText(getApplication(), "login success", Toast.LENGTH_LONG).show();
+
+                    } catch (FileNotFoundException e) {
+                        Toast.makeText(getApplication(),"Filenotfound", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }catch (JSONException e){
+                try {
+                    String resp = loginJson.getString("msg");
+                    int code = loginJson.getInt("code");
+                    Toast.makeText(getApplication(), code + ": " + resp, Toast.LENGTH_LONG).show();
+                } catch (JSONException e2) {Toast.makeText(getApplication(),"Onpost", Toast.LENGTH_LONG).show();}
+
+            }*/
+
+
+
+            /*if (loginJson) {
+                finish();
+            } else {
+                mPasswordView.setError(getString(R.string.error_incorrect_password));
+                mPasswordView.requestFocus();
+            }
+        }*/
 
         @Override
         protected void onCancelled() {
