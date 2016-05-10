@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds, TypeOperators #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Application where
 
@@ -17,6 +18,7 @@ import Database.Persist
 import Database.Persist.Sqlite
 import Control.Monad.IO.Class
 import Data.Text.Encoding (encodeUtf8)
+import Control.Exception hiding (Handler)
 
 import qualified JSON as J
 import Resource
@@ -61,11 +63,14 @@ registerPostServer jwa = do
     if T.null u || T.null p then
         redirect303WithToken "/" ""
     else do
-        uid <- runSqlite sqlTable $ insert $ User u p (generateAesKey u p)
-        tok <- liftIO genRandomToken
-        b <- liftIO $ insertTokenDb tok uid
-        if b then redirect303WithToken "/" (encodeUtf8 tok)
-            else redirect303WithToken "/" ""
+        uid' <- liftIO $ try (runSqlite sqlTable $ insert $ User u p (generateAesKey u p))
+        case uid' of
+            Left (e :: SomeException) -> redirect303WithToken "/" ""
+            Right uid -> do
+                tok <- liftIO genRandomToken
+                b <- liftIO $ insertTokenDb tok uid
+                if b then redirect303WithToken "/" (encodeUtf8 tok)
+                    else redirect303WithToken "/" ""
 
 staticServer :: Server Raw
 staticServer = serveDirectory "static"
