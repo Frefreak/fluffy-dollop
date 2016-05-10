@@ -3,6 +3,7 @@ package zhe.zhe;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -13,7 +14,6 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -30,6 +30,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.example.zhe.zhe.MainActivity;
 import com.example.zhe.zhe.R;
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -66,7 +68,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private UserLoginTask mAuthTask = null;
+    //private UserLoginTask mAuthTask = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -89,7 +91,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
         setupActionBar();
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailView = (AutoCompleteTextView) findViewById(R.id.username);
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -176,91 +178,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
 
-        // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
 
-        try {
-            mConnection.connect(loginid, new WebSocketHandler() {
-                @Override
-                public void onOpen() {
-                    JSONObject js = new JSONObject();
-                    try {
-                        js.put("username", mEmail);
-                        js.put("password", mPassword);
-                        js.put("deviceName", "Meizu");
-                    } catch (JSONException e) {
-                        Toast.makeText(getApplication(), "Errors in sending loginmsg.", Toast.LENGTH_LONG).show();
-                    }
-                    mConnection.sendTextMessage(js.toString());
-                }
-
-                @Override
-                public void onTextMessage(String payload) {
-                    JSONObject b = new JSONObject();
-                    try {
-                        JSONObject a = new JSONObject(payload);
-                        String msg = a.getString("msg");
-                        String temptoken = a.getString("token");
-                        int code = a.getInt("code");
-                        //These code are for protecting original token form covering by mistake login.
-                        //And if login success, a new sync service basic on new token will begin.
-                        if (temptoken  == null || temptoken.equals("")) {
-                            loginoutput = false;
-                            Toast.makeText(getApplication(), "login failed" + " " + msg + " " + code, Toast.LENGTH_LONG).show();
-                        }else {
-                            try {
-                                globaltoken = temptoken;
-                                b.put("token", globaltoken);
-                                PrintWriter writer = new PrintWriter(sdcardPath + tokenFile);
-                                writer.println(globaltoken);
-                                writer.close();
-                                Toast.makeText(getApplication(), "login successed" + " " + msg + " " + code, Toast.LENGTH_LONG).show();
-                                loginoutput = true;
-                            } catch (FileNotFoundException e) {
-                                Toast.makeText(getApplication(), "Errors in receiving msg", Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    } catch (JSONException e) {
-                        Toast.makeText(getApplication(), "Errors in building receiving connnection", Toast.LENGTH_LONG).show();}
-
-                    mConnection.sendTextMessage(b.toString());
-                }
-
-                @Override
-                public void onClose(int code, String reason) {
-                    // Toast.makeText(getApplication(), "Connection lost", Toast.LENGTH_LONG).show();
-                }
-            });
-
-
-                /*try {
-                    // Simulate network access.
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    return false;
-                }*/
-
-            return loginoutput;
-        }
-        catch (WebSocketException e) {
-            Toast.makeText(getApplication(), "Errors in building connnection", Toast.LENGTH_LONG).show();
-            return false;
-        }
-
-
-
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        final String email = mEmailView.getText().toString();
+        final String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
+
+
+
+
+
 
         // Check for a valid password, if the user entered one.
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
@@ -279,6 +212,63 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             focusView = mEmailView;
             cancel = true;
         }
+        try {
+            mConnection.connect(loginid, new WebSocketHandler() {
+                @Override
+                public void onOpen() {
+                    JSONObject js = new JSONObject();
+                    try {
+                        js.put("username", email);
+                        js.put("password", password);
+                        js.put("deviceName", "Meizu");
+                    } catch (JSONException e) {
+                        Toast.makeText(getApplication(), "Errors in sending loginmsg.", Toast.LENGTH_LONG).show();
+                    }
+                    mConnection.sendTextMessage(js.toString());
+                }
+
+                @Override
+                public void onTextMessage(String payload) {
+                    JSONObject b = new JSONObject();
+                    try {
+                        JSONObject a = new JSONObject(payload);
+                        String msg = a.getString("msg");
+                        String temptoken = a.getString("token");
+                        int code = a.getInt("code");
+                        //These code are for protecting original token form covering by mistake login.
+                        //And if login success, a new sync service basic on new token will begin.
+                        if (temptoken  == null || temptoken.equals("")) {
+                            Toast.makeText(getApplication(), "login failed" + " " + msg + " " + code, Toast.LENGTH_LONG).show();
+                            showProgress(false);
+                        }else {
+                            try {
+                                globaltoken = temptoken;
+                                b.put("token", globaltoken);
+                                PrintWriter writer = new PrintWriter(sdcardPath + tokenFile);
+                                writer.println(globaltoken);
+                                writer.close();
+                                Toast.makeText(getApplication(), "login successed" + " " + msg + " " + code, Toast.LENGTH_LONG).show();
+                                showProgress(false);
+                                Intent returnhome = new Intent(getApplicationContext(), MainActivity.class);
+                                startActivity(returnhome);
+                            } catch (FileNotFoundException e) {
+                                Toast.makeText(getApplication(), "Errors in receiving msg", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    } catch (JSONException e) {
+                        Toast.makeText(getApplication(), "Errors in building receiving connnection", Toast.LENGTH_LONG).show();}
+                    mConnection.sendTextMessage(b.toString());
+                }
+
+                @Override
+                public void onClose(int code, String reason) {
+                    // Toast.makeText(getApplication(), "Connection lost", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+        catch (WebSocketException e) {
+            Toast.makeText(getApplication(), "Errors in building connnection", Toast.LENGTH_LONG).show();
+        }
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
@@ -288,8 +278,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            //mAuthTask = new UserLoginTask(email, password);
+            //mAuthTask.execute((Void) null);
         }
     }
 
@@ -393,99 +383,5 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-        private final String mEmail;
-        private final String mPassword;
-        private boolean loginoutput;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-
-        //ljt
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-        }
-
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                ;
-            }
-
-
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-
-
-       /* @Override
-        protected void onPostExecute( JSONObject loginJson) {
-            mAuthTask = null;
-            showProgress(false);
-
-            try {
-                String temptoken = loginJson.getString("token");
-
-                if (temptoken  == null || temptoken.equals("")) {
-                    ;
-                }else {
-                    try {
-                        globaltoken = temptoken;
-                        //b.put("token", globaltoken);
-                        PrintWriter writer = new PrintWriter(sdcardPath + tokenFile);
-                        writer.println(globaltoken);
-                        writer.close();
-                        Toast.makeText(getApplication(), "login success", Toast.LENGTH_LONG).show();
-
-                    } catch (FileNotFoundException e) {
-                        Toast.makeText(getApplication(),"Filenotfound", Toast.LENGTH_LONG).show();
-                    }
-                }
-            }catch (JSONException e){
-                try {
-                    String resp = loginJson.getString("msg");
-                    int code = loginJson.getInt("code");
-                    Toast.makeText(getApplication(), code + ": " + resp, Toast.LENGTH_LONG).show();
-                } catch (JSONException e2) {Toast.makeText(getApplication(),"Onpost", Toast.LENGTH_LONG).show();}
-
-            }*/
-
-
-
-            /*if (loginJson) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }*/
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
 }
 

@@ -35,8 +35,8 @@
 
     <string name="title_activity_register">Sign up</string>
     <!-- Strings related to register-->
-    <string name="prompt_email1">Login</string>
-    <string name="prompt_password1">Password</string>
+    <string name="usernameString">Username</string>
+    <string name="passwordString">Password</string>
     <string name="action_sign_in1">register</string>
 
 </resources>
