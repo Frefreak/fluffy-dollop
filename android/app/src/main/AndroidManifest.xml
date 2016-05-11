@@ -7,6 +7,13 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    //ljt
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+
+
+
 
     <application
         android:allowBackup="true"
@@ -39,6 +46,7 @@
         <activity
             android:name="zhe.zhe.RegisterActivity"
             android:label="@string/title_activity_register"></activity>
+        <service android:name=".SyncService"/>
     </application>
 
 </manifest>

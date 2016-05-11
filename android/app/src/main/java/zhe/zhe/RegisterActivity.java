@@ -3,7 +3,9 @@ package zhe.zhe;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -28,11 +30,20 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.zhe.zhe.MainActivity;
 import com.example.zhe.zhe.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import de.tavendo.autobahn.WebSocketConnection;
+import de.tavendo.autobahn.WebSocketException;
+import de.tavendo.autobahn.WebSocketHandler;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -56,7 +67,6 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private UserLoginTask mAuthTask = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -64,12 +74,19 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
     private View mProgressView;
     private View mLoginFormView;
 
+    //ljt
+    final String loginid = "ws://104.207.144.233:4564/register";
+    private final WebSocketConnection mConnection = new WebSocketConnection();
+    static String globaltoken ;
+    private final String tokenFile = "/cliper.token";
+    private final String sdcardPath = Environment.getExternalStorageDirectory().getPath();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailView = (AutoCompleteTextView) findViewById(R.id.username);
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -146,17 +163,15 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
+
 
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        final String email = mEmailView.getText().toString();
+        final String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -179,27 +194,61 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             cancel = true;
         }
 
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView.requestFocus();
-        } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+        try {
+            mConnection.connect(loginid, new WebSocketHandler() {
+                @Override
+                public void onOpen() {
+                    JSONObject js = new JSONObject();
+                    try {
+                        js.put("username", email);
+                        js.put("password", password);
+                        js.put("deviceName", "Meizu");
+                    } catch (JSONException e) {
+                        Toast.makeText(getApplication(), "onOpenError", Toast.LENGTH_LONG).show();
+                    }
+                    mConnection.sendTextMessage(js.toString());
+                }
+
+                @Override
+                public void onTextMessage(String payload) {
+                    try {
+                        JSONObject a = new JSONObject(payload);
+                        int registcode = a.getInt("code");
+                        String  registmsg = a.getString("msg");
+
+                        if (registcode != 200) {
+                            Toast.makeText(getApplication(), "registe failed" + " " + registmsg + " " + registcode, Toast.LENGTH_LONG).show();
+                            showProgress(false);
+                        }
+                        else {
+                            Toast.makeText(getApplication(), "registe successed, please login" +" " +registcode, Toast.LENGTH_LONG).show();
+                            showProgress(false);
+                            Intent returnhome = new Intent(getApplicationContext(), MainActivity.class);
+                            startActivity(returnhome);
+                        }
+                    }
+                    catch (JSONException e) {Toast.makeText(getApplication(),"onTextMessageError", Toast.LENGTH_LONG).show();}
+                }
+
+                @Override
+                public void onClose(int code, String reason) {
+                    //Log.d(TAG, "Connection lost.");
+                }
+            });
+        } catch (WebSocketException e) {
+            Toast.makeText(getApplication(),"WebSocketError", Toast.LENGTH_LONG).show();
         }
+
     }
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        return email.length() >= 3;
     }
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() >= 3;
     }
 
     /**
@@ -295,11 +344,12 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
-     */
+
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mEmail;
         private final String mPassword;
+        boolean registoutput;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -310,7 +360,9 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
 
-            try {
+            */
+
+            /*try {
                 // Simulate network access.
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -324,7 +376,6 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                     return pieces[1].equals(mPassword);
                 }
             }
-
             // TODO: register the new account here.
             return true;
         }
@@ -347,6 +398,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             mAuthTask = null;
             showProgress(false);
         }
-    }
+    }*/
+
 }
 
