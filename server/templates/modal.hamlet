@@ -6,15 +6,16 @@
           <span aria-hidden=true>&times;
         <h4 .modal-title>Sign up
       <div .modal-body>
-        <form action="/register">
+        <form action=/register method=post>
           <div .form-group .row>
             <label .form-control-label .col-sm-2 for=signupusername>Username
             <div .col-sm-10>
-              <input type=text .form-control #signupusername placeholder=Mr.Proper>
+              <input type=text .form-control #signupusername name=username
+                placeholder=Mr.Proper>
           <div .form-group .row>
             <label .form-control-label .col-sm-2 for=signuppassword>Password
             <div .col-sm-10>
-              <input type=password .form-control #signuppassword>
+              <input type=password .form-control #signuppassword name=password>
               <small .text-muted>Password will be MD5ed before sending to the #
                 \server
           <div.form-group .row>
@@ -30,15 +31,16 @@
           <span aria-hidden=true>&times;
         <h4 .modal-title>Sign in
       <div .modal-body>
-        <form action="/login">
+        <form action=/login method=post>
           <div .form-group .row>
             <label .form-control-label .col-sm-2 for=signinusername>Username
             <div .col-sm-10>
-              <input type=text .form-control #signinusername placeholder=Mr.Proper>
+              <input type=text .form-control #signinusername placeholder=Mr.Proper
+                name=username>
           <div .form-group .row>
             <label .form-control-label .col-sm-2 for=signinpassword>Password
             <div .col-sm-10>
-              <input type=password .form-control #signinpassword>
+              <input type=password .form-control #signinpassword name=password>
               <small .text-muted>Password will be MD5ed before sending to the #
                 \server
           <div.form-group .row>

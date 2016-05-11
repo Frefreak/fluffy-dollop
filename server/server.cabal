@@ -38,6 +38,7 @@ library
                      , random
                      , unordered-containers
                      , time
+                     , servant
                      , servant-server
                      , servant-blaze
                      , shakespeare
