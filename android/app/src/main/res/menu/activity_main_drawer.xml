@@ -3,22 +3,26 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_register"
-            android:title="@string/title_register" />
+            android:id="@+id/nav_REGISTE"
+            android:title="@string/title_Registe" />
         <item
-            android:id="@+id/nav_login"
-            android:title="@string/title_login" />
+            android:id="@+id/nav_LOGIN"
+            android:title="@string/title_Login" />
+
+        <item
+            android:id="@+id/nav_LOGOUT"
+            android:title="@string/title_Logout" />
     </group>
 
-    <item android:title="@string/title_communication">
+    <item android:title="@string/title_Communication">
         <menu>
             <item
-                android:id="@+id/nav_send"
-                android:title="@string/title_send" />
+                android:id="@+id/nav_Send"
+                android:title="@string/title_Send" />
             <item
-                android:id="@+id/nav_receive"
+                android:id="@+id/nav_Receive"
                 android:icon="@drawable/ic_menu_send"
-                android:title="@string/title_receive" />
+                android:title="@string/title_Receive" />
         </menu>
     </item>
 

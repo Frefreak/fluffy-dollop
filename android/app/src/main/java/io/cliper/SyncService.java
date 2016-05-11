@@ -8,7 +8,7 @@ package io.cliper;
  * receiving messages form server then transport the message to mainActivity. The messages are in Json format.
  * returning messages to server for receiving message successfully.
  * The recived Json message have to be decoded in this service。
- *
+ * This service transmit msg to mainactivity using a broadcast intent.
  */
 
 import android.app.Service;
@@ -48,6 +48,10 @@ public class SyncService extends Service {
         gettoken();
 
 
+        /*
+        * Establishing connection and get msg form server.
+        * To see transport formation, click:https://github.com/Frefreak/fluffy-dollop/blob/master/server/spec.md
+        * */
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -80,7 +84,7 @@ public class SyncService extends Service {
                                     if (msgId == "" && code ==200)
                                     {
                                         Intent intent=new Intent();
-                                        intent.putExtra("syncmsg", "Sync connection has been established." + "\n"+ "Token: "+ synctoken);
+                                        intent.putExtra("syncmsg", "Connection established." +"\n"+ "Token: "+ synctoken);
                                         intent.setAction("SyncService");
                                         sendBroadcast(intent);
                                     }
@@ -121,74 +125,6 @@ public class SyncService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        /*gettoken();
-
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mConnection.connect(syncid, new WebSocketHandler() {
-                        @Override
-                        public void onOpen() {
-                            JSONObject js = new JSONObject();
-                            try {
-                                js.put("token", synctoken);
-                            } catch (JSONException e) {
-                                ;
-                            }
-                            mConnection.sendTextMessage(js.toString());
-                        }
-
-
-                        @Override
-                        public void onTextMessage (String receive) {
-                                try {
-                                    JSONObject a = new JSONObject(receive);
-                                    String msg = a.getString("msg");
-                                    int code = a.optInt("code");
-                                    String msgId = a.optString("msgid");
-                                    if (code == 0 && msgId == "") {
-                                        throw new JSONException("server return bad json");
-                                    } else {
-                                        // First kind, the connect is established by sending tokne to server.
-                                        // Then brocast the "connection established" message.
-                                        if (msgId == "" && code ==200)
-                                        {
-                                            Intent intent=new Intent();
-                                            intent.putExtra("syncmsg", "Sync connection has been established." + "\n"+ "Token: "+ synctoken);
-                                            intent.setAction("SyncService");
-                                            sendBroadcast(intent);
-                                        }
-                                        // Second kind, the connect has been established and the server send msg automatically.
-                                        // Then brocast the recived message and messageID.
-                                        else {
-                                            JSONObject resp = new JSONObject();
-                                            resp.put("msgid", msgId);
-                                            resp.put("status", "ok");
-                                            mConnection.sendTextMessage(resp.toString());
-                                            Intent intent=new Intent();
-                                            intent.putExtra("syncmsg","Data: " +msg + "\n" + "msgID: "+ msgId);
-                                            intent.setAction("SyncService");
-                                            sendBroadcast(intent);
-                                        }
-                                    }
-                                } catch (JSONException e) {
-                            }
-                        }
-
-
-                        @Override
-                        public void onClose(int code, String reason) {
-                        }
-                    });
-                } catch (WebSocketException e) {
-
-                }
-
-            }
-        }).start();
-*/
     }
 
 

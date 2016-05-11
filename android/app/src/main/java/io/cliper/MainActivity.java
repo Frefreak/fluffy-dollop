@@ -19,13 +19,23 @@ import java.util.Scanner;
 import android.os.Environment;
 import android.widget.Toast;
 
+import de.tavendo.autobahn.WebSocketConnection;
+import de.tavendo.autobahn.WebSocketException;
+import de.tavendo.autobahn.WebSocketHandler;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.PrintWriter;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private MyReceiver receiver=null;
     public String globaltoken = "";
+    final String logoutid = "ws://104.207.144.233:4564/logout";
+    private final WebSocketConnection mConnection = new WebSocketConnection();
     private final String tokenFile = "/cliper.token";
     private final String sdcardPath = Environment.getExternalStorageDirectory().getPath();
+
 
     /*This function receives and decodes Json messages from SyncService,
     The message have been decoded in SyncService.
@@ -35,7 +45,7 @@ public class MainActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             Bundle bundle = intent.getExtras();
             String syncmsg = bundle.getString("syncmsg");
-            Toast.makeText(getApplication(),"You received: " + syncmsg , Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplication(),syncmsg , Toast.LENGTH_LONG).show();
             //tsync.setText(syncmsg);
             /*try {
             JSONObject c = new JSONObject(count);
@@ -59,6 +69,7 @@ public class MainActivity extends AppCompatActivity
         filter.addAction("SyncService");
         MainActivity.this.registerReceiver(receiver, filter);
 
+
         //Checking if there is a file saving token in SD card. If there is no file or the token is empty than print "need login"
         //If the token is not empty than start syncService.
         try {
@@ -66,29 +77,18 @@ public class MainActivity extends AppCompatActivity
             globaltoken = in.nextLine();
         } catch (FileNotFoundException e) {
             Toast.makeText(getApplication(), "NEED LOGIN!", Toast.LENGTH_LONG).show();
-            //tv.setText("NEED LOGIN");
         }
 
         if (globaltoken  == null || globaltoken.equals("")) {
             Toast.makeText(getApplication(), "NEED LOGIN!", Toast.LENGTH_LONG).show();
-            //tv.setText("Need login");
-            //this.startService(new Intent(this, SyncService.class));
+
         } else {
-            Toast.makeText(getApplication(), "You have logined.", Toast.LENGTH_LONG).show();
-            //tv.setText("You have logined.");
-            //tlog.setText("Token: " + globaltoken);
+
             this.startService(new Intent(this, SyncService.class));
+            this.startService(new Intent(this, PingService.class));
+            Toast.makeText(getApplication(), "Sync start. Ping start.", Toast.LENGTH_LONG).show();
         }
 
-
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
         DrawerLayout drawer = (DrawerLayout) findViewById(io.cliper.R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, io.cliper.R.string.navigation_drawer_open, io.cliper.R.string.navigation_drawer_close);
@@ -140,22 +140,74 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == io.cliper.R.id.nav_register){
+
+        /*
+        * All following codes finishing logout function.
+        * when logout successed, the token file will be emptied.
+        * when logout failed, throw a failed msg.
+        *
+        * */
+        if (id == R.id.nav_REGISTE) {
              Intent intent = new Intent (this,RegisterActivity.class);
             startActivity(intent);
+        } else if (id == R.id.nav_LOGOUT) {
+            try {
+                mConnection.connect(logoutid, new WebSocketHandler() {
+                    @Override
+                    public void onOpen() {
+                        JSONObject jslogout = new JSONObject();
+                        try {
+                            jslogout.put("token", globaltoken);
+                        } catch (JSONException e) {
+                            ;
+                        }
+                        mConnection.sendTextMessage(jslogout.toString());
+                    }
+
+                    @Override
+                    public void onTextMessage(String payload) {
+
+                        try {
+                            JSONObject a = new JSONObject(payload);
+                            String msg = a.getString("msg");
+                            int code = a.getInt("code");
+                            if(code == 200){
+                            Toast.makeText(getApplication(), "Logout successed" +" " +msg +" " + code, Toast.LENGTH_LONG).show();
+                            try{
+                            PrintWriter writer = new PrintWriter(sdcardPath + tokenFile);
+                            writer.println("");
+                            writer.close();}catch (FileNotFoundException e){;}}
+                            else if(code == 422){
+                                Toast.makeText(getApplication(), "You have not login yet.", Toast.LENGTH_LONG).show();
+                            }
+                            else Toast.makeText(getApplication(), "Logout failed!", Toast.LENGTH_LONG).show();
+                        } catch (JSONException e) {
+                            Toast.makeText(getApplication(), "Logout failed!", Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onClose(int code, String reason) {
+                        //Log.d(TAG, "Connection lost.");
+                    }
+                });
+            } catch (WebSocketException e) {
+                //Log.d(TAG, e.toString());
+            }
         }
 
-        else if (id == io.cliper.R.id.nav_login) {
+
+        else if (id == R.id.nav_LOGIN) {
             Intent intent = new Intent(this,LoginActivity.class);
             startActivity(intent);
 
-        } else if (id == io.cliper.R.id.nav_send) {
+        } else if (id == R.id.nav_Send) {
 
-        } else if (id == io.cliper.R.id.nav_receive) {
-
+        } else if (id == R.id.nav_Receive) {
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(io.cliper.R.id.drawer_layout);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

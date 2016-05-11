@@ -39,7 +39,7 @@
             android:label="@string/title_activity_register" />
 
         <service android:name=".SyncService" />
-
+        <service android:name=".PingService" />
     </application>
 
 </manifest>
