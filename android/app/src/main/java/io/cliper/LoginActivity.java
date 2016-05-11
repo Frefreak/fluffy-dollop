@@ -1,4 +1,4 @@
-package zhe.zhe;
+package io.cliper;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -31,8 +31,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.zhe.zhe.MainActivity;
-import com.example.zhe.zhe.R;
 import static android.Manifest.permission.READ_CONTACTS;
 
 //ljt
@@ -88,17 +86,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(io.cliper.R.layout.activity_login);
         setupActionBar();
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.username);
+        mEmailView = (AutoCompleteTextView) findViewById(io.cliper.R.id.username);
         populateAutoComplete();
 
-        mPasswordView = (EditText) findViewById(R.id.password);
+        mPasswordView = (EditText) findViewById(io.cliper.R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                if (id == io.cliper.R.id.login || id == EditorInfo.IME_NULL) {
                     attemptLogin();
                     return true;
                 }
@@ -106,7 +104,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailSignInButton = (Button) findViewById(io.cliper.R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -114,8 +112,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
+        mLoginFormView = findViewById(io.cliper.R.id.login_form);
+        mProgressView = findViewById(io.cliper.R.id.login_progress);
     }
 
     private void populateAutoComplete() {
@@ -134,7 +132,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return true;
         }
         if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
+            Snackbar.make(mEmailView, io.cliper.R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
                     .setAction(android.R.string.ok, new View.OnClickListener() {
                         @Override
                         @TargetApi(Build.VERSION_CODES.M)
@@ -197,18 +195,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         // Check for a valid password, if the user entered one.
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
+            mPasswordView.setError(getString(io.cliper.R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
         }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
+            mEmailView.setError(getString(io.cliper.R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
         } else if (!isUsernameValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
+            mEmailView.setError(getString(io.cliper.R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
         }

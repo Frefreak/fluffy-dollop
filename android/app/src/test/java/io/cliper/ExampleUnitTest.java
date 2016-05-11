@@ -1,4 +1,4 @@
-package com.example.zhe.zhe;
+package io.cliper;
 
 import org.junit.Test;
 

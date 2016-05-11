@@ -1,4 +1,4 @@
-package com.example.zhe.zhe;
+package cliper.example.zhe.cliper;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
