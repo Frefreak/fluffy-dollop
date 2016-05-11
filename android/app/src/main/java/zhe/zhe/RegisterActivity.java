@@ -221,7 +221,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                             showProgress(false);
                         }
                         else {
-                            Toast.makeText(getApplication(), "registe success" +" " +registcode, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplication(), "registe successed, please login" +" " +registcode, Toast.LENGTH_LONG).show();
                             showProgress(false);
                             Intent returnhome = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(returnhome);
