@@ -46,7 +46,7 @@ import static android.Manifest.permission.READ_CONTACTS;
 /**
  * A login screen that offers login via email/password.
  */
-public class RegisterActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class RegisterActivity extends AppCompatActivity /*implements LoaderCallbacks<Cursor>*/ {
 
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -83,7 +83,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         setContentView(io.cliper.R.layout.activity_register);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(io.cliper.R.id.username);
-        populateAutoComplete();
+        //populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(io.cliper.R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -109,13 +109,13 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         mProgressView = findViewById(io.cliper.R.id.login_progress);
     }
 
-    private void populateAutoComplete() {
+    /*private void populateAutoComplete() {
         if (!mayRequestContacts()) {
             return;
         }
 
         getLoaderManager().initLoader(0, null, this);
-    }
+    }*/
 
     private boolean mayRequestContacts() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -142,7 +142,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
     /**
      * Callback received when a permissions request has been completed.
      */
-    @Override
+    /*@Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         if (requestCode == REQUEST_READ_CONTACTS) {
@@ -150,7 +150,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                 populateAutoComplete();
             }
         }
-    }
+    }*/
 
 
     /**
@@ -188,53 +188,59 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             mEmailView.setError(getString(io.cliper.R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
+
         }
-
-        try {
-            mConnection.connect(loginid, new WebSocketHandler() {
-                @Override
-                public void onOpen() {
-                    JSONObject js = new JSONObject();
-                    try {
-                        js.put("username", email);
-                        js.put("password", password);
-                        js.put("deviceName", "Meizu");
-                    } catch (JSONException e) {
-                        Toast.makeText(getApplication(), "onOpenError", Toast.LENGTH_LONG).show();
-                    }
-                    mConnection.sendTextMessage(js.toString());
-                }
-
-                @Override
-                public void onTextMessage(String payload) {
-                    try {
-                        JSONObject a = new JSONObject(payload);
-                        int registcode = a.getInt("code");
-                        String  registmsg = a.getString("msg");
-
-                        if (registcode != 200) {
-                            Toast.makeText(getApplication(), "registe failed" + " " + registmsg + " " + registcode, Toast.LENGTH_LONG).show();
-                            showProgress(false);
-                        }
-                        else {
-                            Toast.makeText(getApplication(), "registe successed, please login" +" " +registcode, Toast.LENGTH_LONG).show();
-                            showProgress(false);
-                            Intent returnhome = new Intent(getApplicationContext(), MainActivity.class);
-                            startActivity(returnhome);
-                        }
-                    }
-                    catch (JSONException e) {Toast.makeText(getApplication(),"onTextMessageError", Toast.LENGTH_LONG).show();}
-                }
-
-                @Override
-                public void onClose(int code, String reason) {
-                    //Log.d(TAG, "Connection lost.");
-                }
-            });
-        } catch (WebSocketException e) {
-            Toast.makeText(getApplication(),"WebSocketError", Toast.LENGTH_LONG).show();
+        if (cancel) {
+            // There was an error; don't attempt login and focus the first
+            // form field with an error.
+            focusView.requestFocus();
         }
+        else {
+            try {
+                mConnection.connect(loginid, new WebSocketHandler() {
+                    @Override
+                    public void onOpen() {
+                        JSONObject js = new JSONObject();
+                        try {
+                            js.put("username", email);
+                            js.put("password", password);
+                            js.put("deviceName", "Meizu");
+                        } catch (JSONException e) {
+                            Toast.makeText(getApplication(), "onOpenError", Toast.LENGTH_LONG).show();
+                        }
+                        mConnection.sendTextMessage(js.toString());
+                    }
 
+                    @Override
+                    public void onTextMessage(String payload) {
+                        try {
+                            JSONObject a = new JSONObject(payload);
+                            int registcode = a.getInt("code");
+                            String registmsg = a.getString("msg");
+
+                            if (registcode != 200) {
+                                Toast.makeText(getApplication(), "registe failed" + " " + registmsg + " " + registcode, Toast.LENGTH_LONG).show();
+                                showProgress(false);
+                            } else {
+                                Toast.makeText(getApplication(), "registe successed, please login" + " " + registcode, Toast.LENGTH_LONG).show();
+                                showProgress(false);
+                                Intent returnhome = new Intent(getApplicationContext(), MainActivity.class);
+                                startActivity(returnhome);
+                            }
+                        } catch (JSONException e) {
+                            Toast.makeText(getApplication(), "onTextMessageError", Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onClose(int code, String reason) {
+                        //Log.d(TAG, "Connection lost.");
+                    }
+                });
+            } catch (WebSocketException e) {
+                Toast.makeText(getApplication(), "WebSocketError", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private boolean isEmailValid(String email) {
@@ -283,7 +289,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         }
     }
 
-    @Override
+    /*@Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return new CursorLoader(this,
                 // Retrieve data rows for the device user's 'profile' contact.
@@ -298,9 +304,9 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
                 // Show primary email addresses first. Note that there won't be
                 // a primary email address if the user hasn't specified one.
                 ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
-    }
+    }*/
 
-    @Override
+   /* @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         List<String> emails = new ArrayList<>();
         cursor.moveToFirst();
@@ -310,24 +316,24 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         }
 
         addEmailsToAutoComplete(emails);
-    }
+    }*/
 
-    @Override
+   /* @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
 
-    }
+    }*/
 
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
+   /* private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(RegisterActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
-    }
+    }*/
 
 
-    private interface ProfileQuery {
+   /* private interface ProfileQuery {
         String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
                 ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
@@ -335,7 +341,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
         int ADDRESS = 0;
         int IS_PRIMARY = 1;
-    }
+    }*/
 
     /**
      * Represents an asynchronous login/registration task used to authenticate
