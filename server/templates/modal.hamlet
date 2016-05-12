@@ -3,10 +3,10 @@
     <div .modal-content>
       <div .modal-header>
         <button type=button .close data-dismiss=modal aria-label=Close>
-          <span aria-hidden=true>&times;
+          <span aria-hidden=true .closeModal>&times;
         <h4 .modal-title>Sign up
       <div .modal-body>
-        <form action=/register method=post>
+        <form action=/register method=post #regform>
           <div .form-group .row>
             <label .form-control-label .col-sm-2 for=signupusername>Username
             <div .col-sm-10>
@@ -20,7 +20,7 @@
                 \server
           <div.form-group .row>
             <div .col-sm-8 .col-sm-offset-4 .submitButtons>
-              <button type=submit .btn .btn-primary-outline>Submit
+              <button type=submit .btn .btn-primary-outline #regButton>Submit
               <button type=button .btn .btn-danger-outline data-dismiss=modal>Close
 
 <div .modal .fade #loginModal role=dialog aria-hidden=true>
@@ -28,10 +28,10 @@
     <div .modal-content>
       <div .modal-header>
         <button type=button .close data-dismiss=modal aria-label=Close>
-          <span aria-hidden=true>&times;
+          <span aria-hidden=true .closeModal>&times;
         <h4 .modal-title>Sign in
       <div .modal-body>
-        <form action=/login method=post>
+        <form action=/login method=post #loginform>
           <div .form-group .row>
             <label .form-control-label .col-sm-2 for=signinusername>Username
             <div .col-sm-10>
@@ -45,5 +45,5 @@
                 \server
           <div.form-group .row>
             <div .col-sm-8 .col-sm-offset-4 .submitButtons>
-              <button type=submit .btn .btn-primary-outline>Submit
+              <button type=submit .btn .btn-primary-outline #loginButton>Submit
               <button type=button .btn .btn-danger-outline data-dismiss=modal>Close
