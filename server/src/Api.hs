@@ -4,7 +4,7 @@ module Api where
 import Control.Monad
 import Network.WebSockets
 import Data.Aeson
-import Data.Text as T (Text, null) 
+import Data.Text as T (Text, null, length)
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import Database.Persist
 import Database.Persist.Sqlite hiding (Connection)
@@ -62,8 +62,10 @@ appRegister conn = do
 performRegisterAction :: Connection -> JRegister -> IO ()
 performRegisterAction conn jr =
     catch (
-        if T.null u || T.null p then 
+        if T.null u || T.null p then
             respondRegisterMessage conn 422 "username/password cannot be empty"
+        else if T.length u < 3 || T.length p < 3 then
+            respondRegisterMessage conn 422 "username/password must be at least 3 characters long"
         else do
             runSqlite sqlTable $ insert $ User u p key
             respondRegisterMessage conn 200 "") handler where

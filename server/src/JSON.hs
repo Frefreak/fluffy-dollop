@@ -83,8 +83,6 @@ data JWebAuth = JWebAuth {
     jwapassword :: Text
 } deriving (Show, Generic)
 
-instance FromFormUrlEncoded JWebAuth where
-    fromFormUrlEncoded vals =
-        let jwa = JWebAuth <$> lookup "username" vals <*> lookup "password" vals
-        in maybeToEither "Invalid FormUrlEncoded Content." jwa
-
+instance FromJSON JWebAuth where
+    parseJSON = withObject "webauth" $ \o ->
+        JWebAuth <$> o .: "username" <*> o .: "password"
