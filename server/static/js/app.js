@@ -41,7 +41,7 @@ $("#loginButton").click(function (event) {
       $("#prompt").removeAttr("hidden");
       if (resJ["token"] == "") {
         $("#prompt")[0].className = "alert alert-danger";
-        $("#prompt button")[0].nextSibling.textContent = respJ["message"];
+        $("#prompt button")[0].nextSibling.textContent = resJ["message"];
       } else {
         $("#prompt")[0].className = "alert alert-success";
         $("#prompt button")[0].nextSibling.textContent = "Login successfully!";
