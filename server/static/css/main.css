@@ -28,7 +28,11 @@
 }
 
 #logo {
-	color: red;
+	width: 90px;
+}
+
+#logo-brand {
+	width: 30px;
 }
 
 #go {

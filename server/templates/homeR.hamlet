@@ -8,8 +8,9 @@
     <div .row>
       <div .span6 .col-md-6>
         <div .row>
-          <span .fa .fa-cog .fa-spin .fa-fw .fa-4x #logo>
-          <span style="font-size:3rem;position:relative;top:-6px;">Cliper
+          <span>
+            <img #logo src=images/Cliper.png>
+          <span style="font-size:3rem;">Cliper
         <span .summary>A simple, lightweight clipboard sharing utility.
       <div .span6 .col-md-6>
           <p #go>Grab your account and <span style="color:yellow">Go!</span>
