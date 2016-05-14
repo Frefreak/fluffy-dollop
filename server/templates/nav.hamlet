@@ -4,7 +4,7 @@
   <div .collapse .navbar-toggleable-xs #navbarItems>
     <a .navbar-brand href=/>
       <span>
-        <img src=images/Cliper.png #logo-brand>
+        <img src=images/Cliper.png style="width:30px">
       Clipper
     <ul .nav .navbar-nav .pull-xs-right>
       $forall a <- [("Login", "login"), ("Register", "register"), ("Documentation", "documentation"), ("About", "about")]
