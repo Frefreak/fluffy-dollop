@@ -1,4 +1,5 @@
 var token = null;
+
 $("#regButton").click(function (event) {
   event.preventDefault();
   var inputs = $("#regform input");
@@ -10,7 +11,8 @@ $("#regButton").click(function (event) {
     data: JSON.stringify(d),
     complete: function (res) {
       var resJ = res["responseJSON"];
-      $("#prompt").removeAttr("hidden");
+      //$("#prompt").removeAttr("hidden");
+      $("#prompt").slideDown('fast');
       if (resJ["token"] == "") {
         $("#prompt")[0].className = "alert alert-danger";
         $("#prompt button")[0].nextSibling.textContent = resJ["message"];
@@ -38,7 +40,8 @@ $("#loginButton").click(function (event) {
     data: JSON.stringify(d),
     complete: function (res) {
       var resJ = res["responseJSON"];
-      $("#prompt").removeAttr("hidden");
+      $("#prompt").slideDown('fast');
+      //$("#prompt").removeAttr("hidden");
       if (resJ["token"] == "") {
         $("#prompt")[0].className = "alert alert-danger";
         $("#prompt button")[0].nextSibling.textContent = resJ["message"];
@@ -57,5 +60,5 @@ $("#loginButton").click(function (event) {
 
 $("#closeAlertButton").click(function (event) {
   event.preventDefault();
-  $("#prompt").prop("hidden", true);
+  $("#prompt").slideUp('fast');
 });

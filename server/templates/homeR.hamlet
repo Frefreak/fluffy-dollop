@@ -1,4 +1,4 @@
-<div #prompt .alert hidden role="alert">
+<div #prompt .alert role="alert">
   <button type="button" class="close" aria-label="Close">
     <span aria-hidden="true" #closeAlertButton>&times;</span>
 ^{navTemplate}
