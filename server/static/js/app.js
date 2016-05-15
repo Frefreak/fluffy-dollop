@@ -13,13 +13,13 @@ $("#regButton").click(function (event) {
       var resJ = res["responseJSON"];
       //$("#prompt").removeAttr("hidden");
       $("#prompt").slideDown('fast');
-      if (resJ["token"] == "") {
+      if (resJ.token == "") {
         $("#prompt")[0].className = "alert alert-danger";
-        $("#prompt button")[0].nextSibling.textContent = resJ["message"];
+        $("#prompt button")[0].nextSibling.textContent = resJ.message;
       } else {
         $("#prompt")[0].className = "alert alert-success";
         $("#prompt button")[0].nextSibling.textContent = "Register successfully!";
-        token = resJ["token"];
+        token = resJ.token;
       }
     }
   });
@@ -42,13 +42,13 @@ $("#loginButton").click(function (event) {
       var resJ = res["responseJSON"];
       $("#prompt").slideDown('fast');
       //$("#prompt").removeAttr("hidden");
-      if (resJ["token"] == "") {
+      if (resJ.token == "") {
         $("#prompt")[0].className = "alert alert-danger";
-        $("#prompt button")[0].nextSibling.textContent = resJ["message"];
+        $("#prompt button")[0].nextSibling.textContent = resJ.message;
       } else {
         $("#prompt")[0].className = "alert alert-success";
         $("#prompt button")[0].nextSibling.textContent = "Login successfully!";
-        token = resJ["token"];
+        token = resJ.token;
       }
     }
   });
