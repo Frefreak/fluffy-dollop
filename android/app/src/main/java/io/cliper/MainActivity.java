@@ -20,7 +20,6 @@ import java.util.Scanner;
 import android.os.Environment;
 import android.widget.Toast;
 
-import android.content.ClipboardManager;
 import de.tavendo.autobahn.WebSocketConnection;
 import de.tavendo.autobahn.WebSocketException;
 import de.tavendo.autobahn.WebSocketHandler;
@@ -82,10 +81,11 @@ public class MainActivity extends AppCompatActivity
                             JSONObject js = new JSONObject();
                             try {
                                 js.put("token", globaltoken);
-                                js.put("data", cb.getPrimaryClip().toString());
+                                js.put("data", cb.getPrimaryClip().getItemAt(0).getText());
+                                //Toast.makeText(getApplicationContext(), js.get("data").toString(), Toast.LENGTH_LONG).show();
 
                             } catch (JSONException e) {
-                                ;
+                                Toast.makeText(getApplicationContext(), "error in posting clipboard contents (pre)", Toast.LENGTH_LONG).show();
                             }
                             mConnection.sendTextMessage(js.toString());
                         }
@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity
                                 Toast.makeText(getApplication(), "Errors in sending msg." , Toast.LENGTH_LONG).show();
                             }
                         }
+
 
                         @Override
                         public void onClose(int code, String reason) {
