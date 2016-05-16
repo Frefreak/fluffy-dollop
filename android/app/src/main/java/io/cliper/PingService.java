@@ -28,7 +28,7 @@ public class PingService extends Service {
     private final String tokenFile = "/cliper.token";
     private final String sdcardPath = Environment.getExternalStorageDirectory().getPath();
     private final WebSocketConnection mConnection = new WebSocketConnection();
-    final String syncid = "ws://104.207.144.233:4564/ping";
+    final String Pingid = "ws://104.207.144.233:4564/ping";
     static String synctoken = "";
 
 
@@ -54,9 +54,9 @@ public class PingService extends Service {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
+                while (!synctoken.equals(" ")) {
                     try {
-                        mConnection.connect(syncid, new WebSocketHandler() {
+                        mConnection.connect(Pingid, new WebSocketHandler() {
                             @Override
                             public void onOpen() {
                                 JSONObject js = new JSONObject();
@@ -87,7 +87,6 @@ public class PingService extends Service {
                             }
                         });
                     } catch (WebSocketException e) {
-
                     }
 
                     /*
@@ -97,6 +96,7 @@ public class PingService extends Service {
                         Thread.sleep(240000);
                     }catch (InterruptedException e) {;}
                 }
+                Toast.makeText(getApplication(), "Ping failed. Need login.", Toast.LENGTH_LONG).show();
             }
         }).start();
         return START_STICKY;
