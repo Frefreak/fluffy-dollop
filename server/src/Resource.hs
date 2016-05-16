@@ -20,7 +20,11 @@ type Handler = EitherT ServantErr IO
 homeTemplate :: Html
 homeTemplate = $(shamletFile "templates/home.hamlet")
 
+tokensTemplate :: Html
+tokensTemplate = $(shamletFile "templates/tokens.hamlet")
+
 homeRTemplate = $(shamletFile "templates/homeR.hamlet")
+tokensRTemplate = $(shamletFile "templates/tokensR.hamlet")
 headTemplate = $(shamletFile "templates/head.hamlet")
 navTemplate = $(shamletFile "templates/nav.hamlet")
 modalTemplate = $(shamletFile "templates/modal.hamlet")

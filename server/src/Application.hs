@@ -32,12 +32,14 @@ import Types
 type CliperApi = Get '[HTML] Html
         :<|> "register" :> ReqBody '[JSON] J.JWebAuth :> Post '[JSON] Value
         :<|> "login" :> ReqBody '[JSON] J.JWebAuth :> Post '[JSON] Value
+        :<|> "tokens" :> Capture "token" T.Text :> Get '[HTML] Html
         :<|> Raw
 
 cliperServer :: Server CliperApi
 cliperServer = homeServer
         :<|> registerPostServer
         :<|> loginPostServer
+        :<|> tokenServer
         :<|> staticServer
 
 homeServer ::Handler Html
@@ -76,6 +78,13 @@ registerPostServer jwa = do
 respondJWA :: Text -> Text -> Handler Value
 respondJWA tok msg = return $
     object ["token" .= String tok, "message" .= String msg]
+
+tokenServer :: T.Text -> Handler Html
+tokenServer token = do
+    r <- liftIO $ runSqlite sqlTable $ selectFirst [TokenMapToken ==. token] []
+    case r of
+        Nothing -> left err404
+        Just (Entity _ _) -> return tokensTemplate
 
 staticServer :: Server Raw
 staticServer = serveDirectory "static"

@@ -1,5 +1,4 @@
 var token = null;
-
 $("#regButton").click(function (event) {
   event.preventDefault();
   var inputs = $("#regform input");
@@ -20,6 +19,7 @@ $("#regButton").click(function (event) {
         $("#prompt")[0].className = "alert alert-success";
         $("#prompt button")[0].nextSibling.textContent = "Register successfully!";
         token = resJ.token;
+        window.location.replace("/tokens/" + resJ.token)
       }
     }
   });
@@ -49,6 +49,7 @@ $("#loginButton").click(function (event) {
         $("#prompt")[0].className = "alert alert-success";
         $("#prompt button")[0].nextSibling.textContent = "Login successfully!";
         token = resJ.token;
+        window.location.replace("/tokens/" + resJ.token)
       }
     }
   });
