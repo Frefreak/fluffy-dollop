@@ -1,3 +1,6 @@
+<div #prompt .alert hidden role="alert">
+  <button type="button" class="close" aria-label="Close">
+    <span aria-hidden="true" #closeAlertButton>&times;</span>
 ^{navTemplate}
 ^{modalTemplate}
 <div .header>
@@ -5,19 +8,17 @@
     <div .row>
       <div .span6 .col-md-6>
         <div .row>
-          <span .fa .fa-cog .fa-spin .fa-fw .fa-4x #logo>
-          <span style="font-size:3rem;position:relative;top:-6px;">Cliper
+          <span>
+            <img src=images/Cliper.png style="width:90px">
+          <span style="font-size:3rem;">Cliper
         <span .summary>A simple, lightweight clipboard sharing utility.
       <div .span6 .col-md-6>
           <p #go>Grab your account and <span style="color:yellow">Go!</span>
-          <button .btn .btn-primary .btn-lg>Try Now!
+          <button .btn .btn-primary .btn-lg #trynow data-toggle=modal
+            data-target=#registerModal>Try Now!
 <div .container-fluid #img>
   <div .col-sm-6 .col-sm-offset-3 #lorem>
     <p>Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...
-    $maybe jr' <- jr
-      <p>#{show jr'}
-    $nothing
-      <p>Nothing
 
 <div .container .features>
   <div .card-columns>
@@ -41,7 +42,7 @@
     <div .card .card-block .text-xs-center>
       <h4 .card-title>Syncing anywhere
       <p .card-text>Shareing links &amp; text &amp; files within your devices
-        in just one click.
+        \ in just one click.
 
     <div .card>
       <img .card-img-bottom src=images/bicycle.jpg>
@@ -53,6 +54,6 @@
           <li .list-group-item><a>Mac Os</a>
         <br>
         <p .text-xs-center>Other platforms' client can be easily wrote using
-            our <a>api</a>.
+            \ our <a>api</a>.
 
 ^{footerTemplate}

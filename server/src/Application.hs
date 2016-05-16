@@ -19,6 +19,7 @@ import Database.Persist.Sqlite
 import Control.Monad.IO.Class
 import Data.Text.Encoding (encodeUtf8)
 import Control.Exception hiding (Handler)
+import Data.Aeson
 
 import qualified JSON as J
 import Resource
@@ -26,14 +27,12 @@ import Database
 import Constant
 import Crypto
 import Api
+import Types
 
 type CliperApi = Get '[HTML] Html
-        :<|> "register" :> ReqBody '[FormUrlEncoded] J.JWebAuth :> Post '[HTML] Html
-        :<|> "login" :> ReqBody '[FormUrlEncoded] J.JWebAuth :> Post '[HTML] Html
+        :<|> "register" :> ReqBody '[JSON] J.JWebAuth :> Post '[JSON] Value
+        :<|> "login" :> ReqBody '[JSON] J.JWebAuth :> Post '[JSON] Value
         :<|> Raw
-
-redirect303WithToken :: Monad m => ByteString -> ByteString -> EitherT ServantErr m a
-redirect303WithToken url token = left err303 { errHeaders = [("Location", url), ("Set-Cookie", mappend "token=" token)] }
 
 cliperServer :: Server CliperApi
 cliperServer = homeServer
@@ -41,10 +40,10 @@ cliperServer = homeServer
         :<|> loginPostServer
         :<|> staticServer
 
-homeServer :: Handler Html
-homeServer = return $ homeTemplate (Nothing :: Maybe J.JWebAuth)
+homeServer ::Handler Html
+homeServer = return homeTemplate
 
-loginPostServer :: J.JWebAuth -> Handler Html
+loginPostServer :: J.JWebAuth -> Handler Value
 loginPostServer jwa = do
     maybeUser <- runSqlite sqlTable $ selectFirst
         [UserUsername ==. J.jwausername jwa, UserPassword ==. J.jwapassword jwa] []
@@ -52,25 +51,31 @@ loginPostServer jwa = do
         Just (Entity uid _) -> do
             tok <- liftIO genRandomToken
             b <- liftIO $ insertTokenDb tok uid
-            if b then redirect303WithToken "/" (encodeUtf8 tok)
-                else redirect303WithToken "/" ""
-        Nothing -> redirect303WithToken "/" ""
+            if b then respondJWA tok ""
+                else respondJWA "" "Something went wrong!"
+        Nothing -> respondJWA "" "Username/Password mismatch!"
 
-registerPostServer :: J.JWebAuth -> Handler Html
+registerPostServer :: J.JWebAuth -> Handler Value
 registerPostServer jwa = do
     let u = J.jwausername jwa
         p = J.jwapassword jwa
     if T.null u || T.null p then
-        redirect303WithToken "/" ""
+        respondJWA "" "Username/Password cannot be empty!"
+    else if T.length u < 3 || T.length p < 3 then
+        respondJWA "" "Username/Password must be at least 3 characters long!"
     else do
         uid' <- liftIO $ try (runSqlite sqlTable $ insert $ User u p (generateAesKey u p))
         case uid' of
-            Left (e :: SomeException) -> redirect303WithToken "/" ""
+            Left (e :: SomeException) -> respondJWA "" "Username already taken"
             Right uid -> do
                 tok <- liftIO genRandomToken
                 b <- liftIO $ insertTokenDb tok uid
-                if b then redirect303WithToken "/" (encodeUtf8 tok)
-                    else redirect303WithToken "/" ""
+                if b then respondJWA tok ""
+                    else respondJWA "" "Something went wrong!"
+
+respondJWA :: Text -> Text -> Handler Value
+respondJWA tok msg = return $
+    object ["token" .= String tok, "message" .= String msg]
 
 staticServer :: Server Raw
 staticServer = serveDirectory "static"

@@ -1,3 +1,10 @@
+.alert {
+	text-align: center;
+	margin-bottom: 0px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+
 .nav a:hover {
 	color: #FFF !important;
 }
@@ -18,10 +25,6 @@
 
 .summary {
 	font-size: 24px;
-}
-
-#logo {
-	color: red;
 }
 
 #go {
@@ -62,5 +65,6 @@ footer {
 	background: #333333;
 }
 
-@media screen and (max-width: 768px) {
-
+#trynow {
+	margin-left: 25%;
+}
