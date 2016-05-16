@@ -20,8 +20,13 @@ import de.tavendo.autobahn.WebSocketException;
 import de.tavendo.autobahn.WebSocketHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 import android.os.Environment;
 
@@ -30,6 +35,7 @@ public class SyncService extends Service {
     private final String sdcardPath = Environment.getExternalStorageDirectory().getPath();
     private final WebSocketConnection mConnection = new WebSocketConnection();
     final String syncid = "ws://104.207.144.233:4564/sync";
+    final String msgfile = "/clipermsg.txt";
     static String synctoken = "";
 
     //This function get token form tokenfilr to globaltoken1.
@@ -42,6 +48,28 @@ public class SyncService extends Service {
         ;
         }
     }
+
+    private void writefile(String fileinput){
+        FileWriter fw =null;
+        try{
+            File f = new File (sdcardPath + msgfile);
+            fw = new FileWriter(f,true);
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        PrintWriter pw = new PrintWriter(fw);
+        pw.println(fileinput);
+        pw.flush();;
+        try{
+            fw.flush();
+            pw.close();
+            fw.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+
 
     @Override
     public int onStartCommand(Intent intent,int flag,int srartid){
@@ -76,6 +104,7 @@ public class SyncService extends Service {
                                 String msg = a.getString("msg");
                                 int code = a.optInt("code");
                                 String msgId = a.optString("msgid");
+                                writefile(msg);
                                 if (code == 0 && msgId == "") {
                                     throw new JSONException("server return bad json");
                                 } else {
@@ -116,6 +145,13 @@ public class SyncService extends Service {
 
             }
         }).start();
+
+
+
+
+
+
+
         return START_STICKY;
     }
 

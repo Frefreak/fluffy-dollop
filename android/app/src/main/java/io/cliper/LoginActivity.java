@@ -37,11 +37,25 @@ import java.io.PrintWriter;
 import android.os.Environment;
 import android.widget.Toast;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.RandomAccessFile;
+import java.io.*;
 
+import java.util.Scanner;
 /**
  * A login screen that offers login via email/password.
  *
  */
+
+
+
+
+
 public class LoginActivity extends AppCompatActivity/* implements LoaderCallbacks<Cursor> */{
 
     /**
@@ -120,8 +134,30 @@ public class LoginActivity extends AppCompatActivity/* implements LoaderCallback
         }
     }
 
+
+    private void writefile(String fileinput){
+        FileWriter fw =null;
+        try{
+            File f = new File (sdcardPath + tokenFile);
+            fw = new FileWriter(f,true);
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        PrintWriter pw = new PrintWriter(fw);
+        pw.println(fileinput);
+        pw.flush();;
+        try{
+            fw.flush();
+            pw.close();
+            fw.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+
     /**
-     * Attempts to sign in or register theaa account specified by the login form.
+     * Attempts to sign in or register thea account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
@@ -134,10 +170,9 @@ public class LoginActivity extends AppCompatActivity/* implements LoaderCallback
         // Store values at the time of the login attempt.
         final String email = mEmailView.getText().toString();
         final String password = mPasswordView.getText().toString();
-
+        FileWriter fw = null;
         boolean cancel = false;
         View focusView = null;
-
 
 
 
@@ -178,9 +213,11 @@ public class LoginActivity extends AppCompatActivity/* implements LoaderCallback
                 @Override
                 public void onTextMessage(String payload) {
                     JSONObject b = new JSONObject();
+
                     try {
                         JSONObject a = new JSONObject(payload);
                         String msg = a.getString("msg");
+
                         String temptoken = a.getString("token");
                         int code = a.getInt("code");
                         //These code are for protecting original token form covering by mistake login.
@@ -192,8 +229,9 @@ public class LoginActivity extends AppCompatActivity/* implements LoaderCallback
                             try {
                                 globaltoken = temptoken;
                                 b.put("token", globaltoken);
+                                //writefile(globaltoken);
                                 PrintWriter writer = new PrintWriter(sdcardPath + tokenFile);
-                                writer.println(globaltoken);
+                                writer.println(globaltoken+"\n");
                                 writer.close();
                                 Toast.makeText(getApplication(), "login successed" + " " + msg + " " + code, Toast.LENGTH_LONG).show();
                                 showProgress(false);

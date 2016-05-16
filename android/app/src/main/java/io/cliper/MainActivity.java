@@ -1,5 +1,6 @@
 package io.cliper;
 
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -19,6 +20,7 @@ import java.util.Scanner;
 import android.os.Environment;
 import android.widget.Toast;
 
+import android.content.ClipboardManager;
 import de.tavendo.autobahn.WebSocketConnection;
 import de.tavendo.autobahn.WebSocketException;
 import de.tavendo.autobahn.WebSocketHandler;
@@ -32,9 +34,13 @@ public class MainActivity extends AppCompatActivity
     private MyReceiver receiver=null;
     public String globaltoken = "";
     final String logoutid = "ws://104.207.144.233:4564/logout";
+    final String postid = "ws://104.207.144.233:4564/post";
     private final WebSocketConnection mConnection = new WebSocketConnection();
     private final String tokenFile = "/cliper.token";
     private final String sdcardPath = Environment.getExternalStorageDirectory().getPath();
+
+
+
 
 
     /*This function receives and decodes Json messages from SyncService,
@@ -61,7 +67,52 @@ public class MainActivity extends AppCompatActivity
         setContentView(io.cliper.R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(io.cliper.R.id.toolbar);
         setSupportActionBar(toolbar);
+        final ClipboardManager cb = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 
+        cb.addPrimaryClipChangedListener(new ClipboardManager.OnPrimaryClipChangedListener() {
+            @Override
+            public void onPrimaryClipChanged() {
+                //Toast.makeText(getApplicationContext(), cb.getPrimaryClip().toString(), Toast.LENGTH_LONG).show();
+
+                try {
+                    mConnection.connect(postid, new WebSocketHandler() {
+
+                        @Override
+                        public void onOpen() {
+                            JSONObject js = new JSONObject();
+                            try {
+                                js.put("token", globaltoken);
+                                js.put("data", cb.getPrimaryClip().toString());
+
+                            } catch (JSONException e) {
+                                ;
+                            }
+                            mConnection.sendTextMessage(js.toString());
+                        }
+
+                        @Override
+                        public void onTextMessage(String payload) {
+                            try {
+                                JSONObject a = new JSONObject(payload);
+                                String msg = a.getString("msg");
+                                int code = a.getInt("code");
+                                Toast.makeText(getApplication(), "msg sent." +msg + code , Toast.LENGTH_LONG).show();
+                            } catch (JSONException e) {
+                                Toast.makeText(getApplication(), "Errors in sending msg." , Toast.LENGTH_LONG).show();
+                            }
+                        }
+
+                        @Override
+                        public void onClose(int code, String reason) {
+                            ;//Toast.makeText(getApplication(), "Connection lost.", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } catch (WebSocketException e) {
+                    Toast.makeText(getApplication(), "Errors in buliding connection.", Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
 
         //Registing the broadcast receiver.
         receiver=new MyReceiver();
@@ -81,9 +132,9 @@ public class MainActivity extends AppCompatActivity
 
         if (globaltoken  == null || globaltoken.equals("")) {
             Toast.makeText(getApplication(), "NEED LOGIN!", Toast.LENGTH_LONG).show();
-
+            this.stopService(new Intent(this, PingService.class));
+            this.stopService(new Intent(this, SyncService.class));
         } else {
-
             this.startService(new Intent(this, SyncService.class));
             this.startService(new Intent(this, PingService.class));
             Toast.makeText(getApplication(), "Sync start. Ping start.", Toast.LENGTH_LONG).show();

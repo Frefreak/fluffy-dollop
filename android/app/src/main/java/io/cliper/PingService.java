@@ -76,7 +76,7 @@ public class PingService extends Service {
                                     if (code == 200) {
                                         ;
                                     } else {
-                                        Toast.makeText(getApplication(), "Errors in pinging servicer" + code, Toast.LENGTH_LONG).show();
+                                        Toast.makeText(getApplication(), "Errors in pinging servicer" + code +msg, Toast.LENGTH_LONG).show();
                                     }
                                 } catch (JSONException e) {
                                 }
