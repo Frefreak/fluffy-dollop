@@ -1,65 +1,90 @@
-var token = null;
-$("#regButton").click(function (event) {
-  event.preventDefault();
-  var inputs = $("#regform input");
-  var d = {"username": inputs[0].value, "password": inputs[1].value};
-  $.ajax({
-    type: "POST",
-    url:  "register",
-    contentType: "application/json",
-    data: JSON.stringify(d),
-    complete: function (res) {
-      var resJ = res["responseJSON"];
-      //$("#prompt").removeAttr("hidden");
-      $("#prompt").slideDown('fast');
-      if (resJ.token == "") {
-        $("#prompt")[0].className = "alert alert-danger";
-        $("#prompt button")[0].nextSibling.textContent = resJ.message;
-      } else {
-        $("#prompt")[0].className = "alert alert-success";
-        $("#prompt button")[0].nextSibling.textContent = "Register successfully!";
-        token = resJ.token;
-        window.location.replace("/tokens/" + resJ.token)
+$(document).ready(function() {
+  $("#regButton").on('click', function (event) {
+    event.preventDefault();
+    var inputs = $("#regform input");
+    var d = {"username": inputs[0].value, "password": inputs[1].value};
+    $.ajax({
+      type: "POST",
+      url:  "/register",
+      contentType: "application/json",
+      data: JSON.stringify(d),
+      complete: function (res) {
+        var resJ = res["responseJSON"];
+        //$("#prompt").removeAttr("hidden");
+        $("#prompt").slideDown('fast');
+        if (resJ.token == "") {
+          $("#prompt")[0].className = "alert alert-danger";
+          $("#prompt button")[0].nextSibling.textContent = resJ.message;
+        } else {
+          $("#prompt")[0].className = "alert alert-success";
+          $("#prompt button")[0].nextSibling.textContent = "Register successfully!";
+          window.location.replace("/tokens/" + resJ.token)
+        }
       }
+    });
+    $(".closeModal").click();
+    inputs.each(function (index, element) {
+      element.value = "";
+    });
+  });
+  
+  $("#loginButton").on('click', function (event) {
+    event.preventDefault();
+    var inputs = $("#loginform input");
+    var d = {"username": inputs[0].value, "password": inputs[1].value};
+    $.ajax({
+      type: "POST",
+      url:  "/login",
+      contentType: "application/json",
+      data: JSON.stringify(d),
+      complete: function (res) {
+        var resJ = res["responseJSON"];
+        $("#prompt").slideDown('fast');
+        //$("#prompt").removeAttr("hidden");
+        if (resJ.token == "") {
+          $("#prompt")[0].className = "alert alert-danger";
+          $("#prompt button")[0].nextSibling.textContent = resJ.message;
+        } else {
+          $("#prompt")[0].className = "alert alert-success";
+          $("#prompt button")[0].nextSibling.textContent = "Login successfully!";
+          window.location.replace("/tokens/" + resJ.token)
+        }
+      }
+    });
+    $(".closeModal").click();
+    inputs.each(function (index, element) {
+      element.value = "";
+    });
+  });
+  
+  $("#closeAlertButton").click(function (event) {
+    event.preventDefault();
+    $("#prompt").slideUp('fast');
+  });
+
+  $('#post').on('click', function(event) {
+    event.preventDefault();
+    var data = $('#posttext').val();
+    var pathname = window.location.pathname.split('/');
+    var token = pathname.pop();
+    if (token == "")
+      token = pathname.pop();
+    if (data != "") {
+      var d = {"token": token, "data": data};
+      $.ajax({
+        type: "POST",
+        url: "/post",
+        dataType: "json",
+        contentType: "application/json",
+        data: JSON.stringify(d),
+        complete: function (res) {
+          var resJ = res.responseJSON;
+          if (resJ.code == 200)
+            alert("post successfully");
+          else
+            alert(resJ.code + ": " + resJ.msg);
+        }
+      });
     }
   });
-  $(".closeModal").click();
-  inputs.each(function (index, element) {
-    element.value = "";
-  });
-});
-
-$("#loginButton").click(function (event) {
-  event.preventDefault();
-  var inputs = $("#loginform input");
-  var d = {"username": inputs[0].value, "password": inputs[1].value};
-  $.ajax({
-    type: "POST",
-    url:  "login",
-    contentType: "application/json",
-    data: JSON.stringify(d),
-    complete: function (res) {
-      var resJ = res["responseJSON"];
-      $("#prompt").slideDown('fast');
-      //$("#prompt").removeAttr("hidden");
-      if (resJ.token == "") {
-        $("#prompt")[0].className = "alert alert-danger";
-        $("#prompt button")[0].nextSibling.textContent = resJ.message;
-      } else {
-        $("#prompt")[0].className = "alert alert-success";
-        $("#prompt button")[0].nextSibling.textContent = "Login successfully!";
-        token = resJ.token;
-        window.location.replace("/tokens/" + resJ.token)
-      }
-    }
-  });
-  $(".closeModal").click();
-  inputs.each(function (index, element) {
-    element.value = "";
-  });
-});
-
-$("#closeAlertButton").click(function (event) {
-  event.preventDefault();
-  $("#prompt").slideUp('fast');
 });

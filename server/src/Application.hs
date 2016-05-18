@@ -33,6 +33,7 @@ type CliperApi = Get '[HTML] Html
         :<|> "register" :> ReqBody '[JSON] J.JWebAuth :> Post '[JSON] Value
         :<|> "login" :> ReqBody '[JSON] J.JWebAuth :> Post '[JSON] Value
         :<|> "tokens" :> Capture "token" T.Text :> Get '[HTML] Html
+        :<|> "post" :> ReqBody '[JSON] J.JPost :> Post '[JSON] Value
         :<|> Raw
 
 cliperServer :: Server CliperApi
@@ -40,6 +41,7 @@ cliperServer = homeServer
         :<|> registerPostServer
         :<|> loginPostServer
         :<|> tokenServer
+        :<|> postPostServer
         :<|> staticServer
 
 homeServer ::Handler Html
@@ -85,6 +87,17 @@ tokenServer token = do
     case r of
         Nothing -> left err404
         Just (Entity _ _) -> return tokensTemplate
+
+postPostServer :: J.JPost -> Handler Value
+postPostServer jp = do
+    let genPostRespMsg code msg = object ["code" .= Number code, "msg" .= String msg]
+        token = J.jptoken jp
+    r <- liftIO $ runSqlite sqlTable $ selectFirst [TokenMapToken ==. token] []
+    case r of
+        Nothing -> return $ genPostRespMsg 422 "No such Token"
+        Just (Entity _ tokenmap) -> do
+            liftIO $ addMessageToToken (tokenMapUser tokenmap) token (J.jpdata jp)
+            return $ genPostRespMsg 200 ""
 
 staticServer :: Server Raw
 staticServer = serveDirectory "static"

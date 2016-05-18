@@ -1,1 +1,9 @@
-<h3>Success
+<div .container>
+  <div .row>
+    <div .col-md-6>
+      <h2>Post
+      <textarea rows=16 cols=50 #posttext>
+      <button type=submit #post .btn .btn-primay>POST
+    <div .col-md-6>
+      <h2>Sync
+      <textarea rows=16 cols=50 readonly #synctext>
