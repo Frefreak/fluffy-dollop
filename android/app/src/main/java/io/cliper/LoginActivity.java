@@ -157,7 +157,7 @@ public class LoginActivity extends AppCompatActivity/* implements LoaderCallback
 
 
     /**
-     * Attempts to sign in or register thea account specified by the login form.
+     * Attempts to sign in or register a account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
@@ -279,6 +279,7 @@ public class LoginActivity extends AppCompatActivity/* implements LoaderCallback
         //TODO: Replace this with your own logic
         return password.length() >= 3;
     }
+
 
     /**
      * Shows the progress UI and hides the login form.

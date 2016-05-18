@@ -254,6 +254,8 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
 
         } else if (id == R.id.nav_Send) {
+            Intent intent = new Intent(this,ChatActivity.class);
+            startActivity(intent);
 
         } else if (id == R.id.nav_Receive) {
         }
