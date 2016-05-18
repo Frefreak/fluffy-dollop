@@ -56,7 +56,7 @@ $(document).ready(function() {
       element.value = "";
     });
   });
-  
+
   $("#closeAlertButton").click(function (event) {
     event.preventDefault();
     $("#prompt").slideUp('fast');
@@ -87,4 +87,30 @@ $(document).ready(function() {
       });
     }
   });
+
+  $('#sync').on('click', function(event) {
+    event.preventDefault();
+    var syncSocket = new WebSocket(websocket_url("/sync"));
+    syncSocket.onopen = function(event) {
+      var pathname = window.location.pathname.split('/');
+      var token = pathname.pop();
+      if (token == "")
+        token = pathname.pop();
+      syncSocket.send(JSON.stringify({"token": token}));
+      syncSocket.onmessage = function (event) {
+        var json = JSON.parse(event.data);
+        if (json.msg == "" && json.code == 200)
+          alert("sync successfully");
+        else {
+          syncSocket.send(JSON.stringify({"msgid": json.msgid, "status": "ok"}));
+          $('#synctext').append($('<li>'+json.msg+'</li>'))
+        }
+      }
+    };
+  });
 });
+
+function websocket_url(s) {
+    var l = window.location;
+    return ((l.protocol === "https:") ? "wss://" : "ws://") + l.host + s;
+}

@@ -167,7 +167,7 @@ client:
 ```json
 	{
 		"msgid": "received msg id",
-		"code": "ok"
+		"status": "ok"
 	}
 ```
 after the server gets this ack, it deleted the msg stored and proceed 
