@@ -1,15 +1,18 @@
 package io.cliper;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -21,7 +24,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -48,28 +50,10 @@ public class ChatActivity extends AppCompatActivity
     private Button sendBtn;
     private ChatAdapter adapter;
     private ArrayList<ChatMessage> chatHistory;
+
     private MyReceiver receiver=null;
     public String globaltoken = "";
     private final WebSocketConnection mConnection = new WebSocketConnection();
-
-    /*This function receives and decodes Json messages from SyncService,
-    The message have been decoded in SyncService.
-     BUt I am trying to put the decoding part in SyncService for more comvience message transportation. 16/5/5.*/
-    public class MyReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Bundle bundle = intent.getExtras();
-            String syncmsg = bundle.getString("syncmsg");
-            Toast.makeText(getApplication(),syncmsg , Toast.LENGTH_LONG).show();
-            //tsync.setText(syncmsg);
-            /*try {
-            JSONObject c = new JSONObject(count);
-            String msg = c.getString("msg");
-            String msgId = c.optString("msgid");
-        }catch (JSONException e){;}*/
-        }
-    }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,14 +64,60 @@ public class ChatActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(io.cliper.R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, io.cliper.R.string.navigation_drawer_open, io.cliper.R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        if (drawer != null)
+            drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(io.cliper.R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        final ClipboardManager cb = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        if (navigationView != null)
+            navigationView.setNavigationItemSelectedListener(this);
 
+        /* Beginning in Android 6.0 (API level 23), users grant permissions to apps while the app is running,
+            not when they install the app. Our app uses WRITE_EXTERNAL_STORAGE and INTERNET. The following checks
+            if WRITE_EXTERNAL_STORAGE is given and prompt for enabling if not.
+         */
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constant.REQUEST_WRITE_EXTERNAL_STORAGE);
+        } else {
+            initialize();
+            initControls();
+        }
+        /* end of permission request */
+
+    }
+
+    public void initialize() {
+        initializeToken(); // this must comes first
+        initializeServices();
+        initializeClipboardListener();
+        registerBroadcastReceiver();
+    }
+
+    public void initializeToken() {
+        try {
+            Scanner in = new Scanner(new FileReader(Constant.tokenFileAbsPath));
+            globaltoken = in.nextLine();
+        } catch (FileNotFoundException e) {
+            Toast.makeText(getApplication(), "NEED LOGIN!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void initializeServices() {
+        if (globaltoken  == null || globaltoken.equals("")) {
+            Toast.makeText(getApplication(), "NEED LOGIN!", Toast.LENGTH_LONG).show();
+            this.stopService(new Intent(this, PingService.class));
+            this.stopService(new Intent(this, SyncService.class));
+        } else {
+            this.startService(new Intent(this, SyncService.class));
+            this.startService(new Intent(this, PingService.class));
+            Toast.makeText(getApplication(), "Sync start. Ping start.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void initializeClipboardListener() {
+        final ClipboardManager cb = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
         cb.addPrimaryClipChangedListener(new ClipboardManager.OnPrimaryClipChangedListener() {
             @Override
             public void onPrimaryClipChanged() {
@@ -134,6 +164,9 @@ public class ChatActivity extends AppCompatActivity
 
             }
         });
+    }
+
+    public void registerBroadcastReceiver() {
         //Registing the broadcast receiver.
         receiver=new MyReceiver();
         IntentFilter filter=new IntentFilter();
@@ -141,25 +174,42 @@ public class ChatActivity extends AppCompatActivity
         ChatActivity.this.registerReceiver(receiver, filter);
 //Checking if there is a file saving token in SD card. If there is no file or the token is empty than print "need login"
         //If the token is not empty than start syncService.
-        try {
-            Scanner in = new Scanner(new FileReader(Constant.tokenFileAbsPath));
-            globaltoken = in.nextLine();
-        } catch (FileNotFoundException e) {
-            Toast.makeText(getApplication(), "NEED LOGIN!", Toast.LENGTH_LONG).show();
-        }
-
-        if (globaltoken  == null || globaltoken.equals("")) {
-            Toast.makeText(getApplication(), "NEED LOGIN!", Toast.LENGTH_LONG).show();
-            this.stopService(new Intent(this, PingService.class));
-            this.stopService(new Intent(this, SyncService.class));
-        } else {
-            this.startService(new Intent(this, SyncService.class));
-            this.startService(new Intent(this, PingService.class));
-            Toast.makeText(getApplication(), "Sync start. Ping start.", Toast.LENGTH_LONG).show();
-        }
-
-        initControls();
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case Constant.REQUEST_WRITE_EXTERNAL_STORAGE: {
+                if (grantResults.length > 0) {
+                    initialize();   // from ljt
+                    initControls(); // from zxz
+                } else {    // user denied our permission request
+                    finish();
+                }
+            }
+
+        }
+    }
+
+    /*  This function receives and decodes Json messages from SyncService,
+        The message have been decoded in SyncService.
+        But I am trying to put the decoding part in SyncService for more convenient message transportation. 16/5/5.*/
+    public class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            String syncmsg = bundle.getString("syncmsg");
+            Toast.makeText(getApplication(),syncmsg , Toast.LENGTH_LONG).show();
+            //tsync.setText(syncmsg);
+            /*try {
+            JSONObject c = new JSONObject(count);
+            String msg = c.getString("msg");
+            String msgId = c.optString("msgid");
+        }catch (JSONException e){;}*/
+        }
+    }
+
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(io.cliper.R.id.drawer_layout);

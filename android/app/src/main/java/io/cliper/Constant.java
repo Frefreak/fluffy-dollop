@@ -18,4 +18,6 @@ public class Constant {
     public static final String msgFilePath = "/cliper.msg";
     public static final String tokenFileAbsPath = sdcardPath + tokenFilePath;
     public static final String msgFileAbsPath = sdcardPath + msgFilePath;
+
+    public static final int REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 }
