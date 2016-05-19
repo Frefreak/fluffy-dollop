@@ -89,6 +89,7 @@ $(document).ready(function() {
   });
 
   $('#sync').on('click', function(event) {
+    var syncButton = $(this);
     event.preventDefault();
     var syncSocket = new WebSocket(websocket_url("/sync"));
     syncSocket.onopen = function(event) {
@@ -99,14 +100,20 @@ $(document).ready(function() {
       syncSocket.send(JSON.stringify({"token": token}));
       syncSocket.onmessage = function (event) {
         var json = JSON.parse(event.data);
-        if (json.msg == "" && json.code == 200)
+        if (json.msg == "" && json.code == 200) {
           alert("sync successfully");
-        else {
+          syncButton.parent().find('h2').text("Sync (synced)");
+        } else {
           syncSocket.send(JSON.stringify({"msgid": json.msgid, "status": "ok"}));
           $('#synctext').append($('<li>'+json.msg+'</li>'))
         }
       }
     };
+  });
+
+  $('#clearText').on('click', function() {
+    $('#posttext').val("").focus();
+
   });
 });
 

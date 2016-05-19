@@ -2,9 +2,10 @@
   <div .row>
     <div .col-md-6>
       <h2>Post
-      <textarea rows=16 cols=50 #posttext>
+      <textarea rows=16 cols=40 #posttext>
       <button type=submit #post .btn .btn-primary>POST
+      <button #clearText .btn .btn-warning-outline>CLEAR
     <div .col-md-6>
       <h2>Sync
-      <button #sync .btn .btn-primary>Sync
+      <button #sync .btn .btn-primary>SYNC
       <ul #synctext>
