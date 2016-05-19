@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity
         * when logout failed, throw a failed msg.
         *
         * */
-        if (id == R.id.nav_REGISTE) {
+        if (id == R.id.nav_REGISTER) {
              Intent intent = new Intent (this,RegisterActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_LOGOUT) {
@@ -246,15 +246,12 @@ public class MainActivity extends AppCompatActivity
             } catch (WebSocketException e) {
                 //Log.d(TAG, e.toString());
             }
-        }
-
-
-        else if (id == R.id.nav_LOGIN) {
+        } else if (id == R.id.nav_LOGIN) {
             Intent intent = new Intent(this,LoginActivity.class);
             startActivity(intent);
 
         } else if (id == R.id.nav_Send) {
-            Intent intent = new Intent(this,ChatActivity.class);
+            Intent intent = new Intent(this, ChatActivity.class);
             startActivity(intent);
 
         } else if (id == R.id.nav_Receive) {

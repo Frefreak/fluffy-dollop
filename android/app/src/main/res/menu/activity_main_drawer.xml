@@ -3,7 +3,7 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_REGISTE"
+            android:id="@+id/nav_REGISTER"
             android:title="@string/title_Registe" />
         <item
             android:id="@+id/nav_LOGIN"
