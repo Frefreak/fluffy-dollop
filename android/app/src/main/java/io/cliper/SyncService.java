@@ -8,10 +8,12 @@ package io.cliper;
  * receiving messages form server then transport the message to mainActivity. The messages are in Json format.
  * returning messages to server for receiving message successfully.
  * The recived Json message have to be decoded in this service。
- * This service transmit msg to mainactivity using a broadcast intent.
+ * This service transmit msg to ChatActivity using a broadcast intent.
  */
 
 import android.app.Service;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
@@ -28,13 +30,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
-import android.os.Environment;
 
 public class SyncService extends Service {
     private final WebSocketConnection mConnection = new WebSocketConnection();
     static String synctoken = "";
 
-    //This function get token form tokenfilr to globaltoken1.
+    //This function get token form tokenfile to globaltoken1.
     void gettoken (){
         try {
             Scanner in = new Scanner(new FileReader(Constant.tokenFileAbsPath));
@@ -45,7 +46,7 @@ public class SyncService extends Service {
         }
     }
 
-    private void writefile(String fileinput){
+    private void writeFile(String fileinput){
         FileWriter fw =null;
         try{
             File f = new File (Constant.msgFileAbsPath);
@@ -55,7 +56,7 @@ public class SyncService extends Service {
         }
         PrintWriter pw = new PrintWriter(fw);
         pw.println(fileinput);
-        pw.flush();;
+        pw.flush();
         try{
             fw.flush();
             pw.close();
@@ -100,7 +101,7 @@ public class SyncService extends Service {
                                 String msg = a.getString("msg");
                                 int code = a.optInt("code");
                                 String msgId = a.optString("msgid");
-                                writefile(msg);
+                                writeFile(msg);
                                 if (code == 0 && msgId == "") {
                                     throw new JSONException("server return bad json");
                                 } else {
@@ -124,6 +125,7 @@ public class SyncService extends Service {
                                         intent.putExtra("syncmsg","Data: " +msg + "\n" + "msgID: "+ msgId);
                                         intent.setAction("SyncService");
                                         sendBroadcast(intent);
+                                        setClipboardContent(msg);
                                     }
                                 }
                             } catch (JSONException e) {
@@ -152,6 +154,10 @@ public class SyncService extends Service {
     }
 
 
+    public void setClipboardContent(String s) {
+        ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        cm.setPrimaryClip(ClipData.newPlainText("", s));
+    }
 
 
     @Override
