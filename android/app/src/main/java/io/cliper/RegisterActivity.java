@@ -53,7 +53,6 @@ public class RegisterActivity extends AppCompatActivity /*implements LoaderCallb
     private View mLoginFormView;
 
     //ljt
-    final String loginid = "ws://104.207.144.233:4564/register";
     private final WebSocketConnection mConnection = new WebSocketConnection();
 
     @Override
@@ -139,7 +138,7 @@ public class RegisterActivity extends AppCompatActivity /*implements LoaderCallb
         }
         else {
             try {
-                mConnection.connect(loginid, new WebSocketHandler() {
+                mConnection.connect(Constant.registerUrl, new WebSocketHandler() {
                     @Override
                     public void onOpen() {
                         JSONObject js = new JSONObject();

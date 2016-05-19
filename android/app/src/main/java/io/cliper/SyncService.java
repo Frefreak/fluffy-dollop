@@ -31,17 +31,13 @@ import java.util.Scanner;
 import android.os.Environment;
 
 public class SyncService extends Service {
-    private final String tokenFile = "/cliper.token";
-    private final String sdcardPath = Environment.getExternalStorageDirectory().getPath();
     private final WebSocketConnection mConnection = new WebSocketConnection();
-    final String syncid = "ws://104.207.144.233:4564/sync";
-    final String msgfile = "/clipermsg.txt";
     static String synctoken = "";
 
     //This function get token form tokenfilr to globaltoken1.
     void gettoken (){
         try {
-            Scanner in = new Scanner(new FileReader(sdcardPath + tokenFile));
+            Scanner in = new Scanner(new FileReader(Constant.tokenFileAbsPath));
             synctoken = in.nextLine();
         } catch (FileNotFoundException e) {
             ;
@@ -52,7 +48,7 @@ public class SyncService extends Service {
     private void writefile(String fileinput){
         FileWriter fw =null;
         try{
-            File f = new File (sdcardPath + msgfile);
+            File f = new File (Constant.msgFileAbsPath);
             fw = new FileWriter(f,true);
         }catch(IOException e){
             e.printStackTrace();
@@ -84,7 +80,7 @@ public class SyncService extends Service {
             @Override
             public void run() {
                 try {
-                    mConnection.connect(syncid, new WebSocketHandler() {
+                    mConnection.connect(Constant.syncUrl, new WebSocketHandler() {
                         @Override
                         public void onOpen() {
                             JSONObject js = new JSONObject();
