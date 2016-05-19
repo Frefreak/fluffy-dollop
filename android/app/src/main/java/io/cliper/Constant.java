@@ -15,5 +15,7 @@ public class Constant {
 
     public static final String sdcardPath = Environment.getExternalStorageDirectory().getPath();
     public static final String tokenFilePath = "/cliper.token";
+    public static final String msgFilePath = "/cliper.msg";
     public static final String tokenFileAbsPath = sdcardPath + tokenFilePath;
+    public static final String msgFileAbsPath = sdcardPath + msgFilePath;
 }
