@@ -1,5 +1,8 @@
 language: android
 
+env:
+    - TERM=dumb
+
 android:
     components:
         - platform-tools
