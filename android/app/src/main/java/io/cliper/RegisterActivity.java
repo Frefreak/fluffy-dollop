@@ -165,7 +165,7 @@ public class RegisterActivity extends AppCompatActivity /*implements LoaderCallb
                             } else {
                                 Toast.makeText(getApplication(), "registe successed, please login" + " " + registcode, Toast.LENGTH_LONG).show();
                                 showProgress(false);
-                                Intent returnhome = new Intent(getApplicationContext(), MainActivity.class);
+                                Intent returnhome = new Intent(getApplicationContext(), ChatActivity.class);
                                 startActivity(returnhome);
                             }
                         } catch (JSONException e) {

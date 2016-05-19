@@ -230,7 +230,7 @@ public class LoginActivity extends AppCompatActivity/* implements LoaderCallback
                                 writer.close();
                                 Toast.makeText(getApplication(), "login successed" + " " + msg + " " + code, Toast.LENGTH_LONG).show();
                                 showProgress(false);
-                                Intent returnhome = new Intent(getApplicationContext(), MainActivity.class);
+                                Intent returnhome = new Intent(getApplicationContext(), ChatActivity.class);
                                 returnhome.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(returnhome);
                             } catch (FileNotFoundException e) {
