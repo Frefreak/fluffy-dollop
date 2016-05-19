@@ -17,7 +17,6 @@ import android.content.IntentFilter;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
-import android.os.Environment;
 import android.widget.Toast;
 
 import de.tavendo.autobahn.WebSocketConnection;
@@ -32,15 +31,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private MyReceiver receiver=null;
     public String globaltoken = "";
-    final String logoutid = "ws://104.207.144.233:4564/logout";
-    final String postid = "ws://104.207.144.233:4564/post";
     private final WebSocketConnection mConnection = new WebSocketConnection();
-    private final String tokenFile = "/cliper.token";
-    private final String sdcardPath = Environment.getExternalStorageDirectory().getPath();
-
-
-
-
 
     /*This function receives and decodes Json messages from SyncService,
     The message have been decoded in SyncService.
@@ -74,7 +65,7 @@ public class MainActivity extends AppCompatActivity
                 //Toast.makeText(getApplicationContext(), cb.getPrimaryClip().toString(), Toast.LENGTH_LONG).show();
 
                 try {
-                    mConnection.connect(postid, new WebSocketHandler() {
+                    mConnection.connect(Constant.postUrl, new WebSocketHandler() {
 
                         @Override
                         public void onOpen() {
@@ -125,7 +116,7 @@ public class MainActivity extends AppCompatActivity
         //Checking if there is a file saving token in SD card. If there is no file or the token is empty than print "need login"
         //If the token is not empty than start syncService.
         try {
-            Scanner in = new Scanner(new FileReader(sdcardPath + tokenFile));
+            Scanner in = new Scanner(new FileReader(Constant.tokenFileAbsPath));
             globaltoken = in.nextLine();
         } catch (FileNotFoundException e) {
             Toast.makeText(getApplication(), "NEED LOGIN!", Toast.LENGTH_LONG).show();
@@ -204,7 +195,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         } else if (id == R.id.nav_LOGOUT) {
             try {
-                mConnection.connect(logoutid, new WebSocketHandler() {
+                mConnection.connect(Constant.logoutUrl, new WebSocketHandler() {
                     @Override
                     public void onOpen() {
                         JSONObject jslogout = new JSONObject();
@@ -226,7 +217,7 @@ public class MainActivity extends AppCompatActivity
                             if(code == 200){
                             Toast.makeText(getApplication(), "Logout successed" +" " +msg +" " + code, Toast.LENGTH_LONG).show();
                             try{
-                            PrintWriter writer = new PrintWriter(sdcardPath + tokenFile);
+                            PrintWriter writer = new PrintWriter(Constant.tokenFileAbsPath);
                             writer.println("");
                             writer.close();}catch (FileNotFoundException e){;}}
                             else if(code == 422){

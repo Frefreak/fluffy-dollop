@@ -2,6 +2,7 @@ package io.cliper;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 
-public class ChatActivity extends ActionBarActivity {
+public class ChatActivity extends AppCompatActivity {
 
     private EditText messageET;
     private ListView messagesContainer;
