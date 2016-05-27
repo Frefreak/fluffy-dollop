@@ -2,10 +2,13 @@ package io.cliper;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import io.cliper.ChatMessage;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -51,4 +54,24 @@ public class CliperDbOpenHelper extends SQLiteOpenHelper {
         db.insert(CLIPER_TABLE_NAME, "null", values);
     }
 
+    public static ArrayList<ChatMessage> getAllMessages(CliperDbOpenHelper dbHelper) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String[] projection = {
+                KEY_SOURCE,
+                KEY_MSG,
+                KEY_TIME
+        };
+        Cursor c = db.query(CLIPER_TABLE_NAME, projection, null, null, null, null, null);
+        int cap = c.getCount();
+        c.moveToFirst();
+        ArrayList<ChatMessage> result = new ArrayList<ChatMessage>(cap);
+        for (int i = 0; i < cap; i++) {
+            boolean isMe = c.getInt(c.getColumnIndexOrThrow(KEY_SOURCE)) > 0;
+            String msg = c.getString(c.getColumnIndexOrThrow(KEY_MSG));
+            String time = c.getString(c.getColumnIndexOrThrow(KEY_TIME));
+            result.add(new ChatMessage(isMe, msg, time));
+            c.moveToNext();
+        }
+        return result;
+    }
 }

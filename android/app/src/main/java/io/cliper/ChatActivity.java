@@ -52,6 +52,8 @@ public class ChatActivity extends AppCompatActivity
     private ChatAdapter adapter;
     private ArrayList<ChatMessage> chatHistory;
 
+    public CliperDbOpenHelper dbHelper;
+
     private MyReceiver receiver=null;
     public String globaltoken = "";
     private final WebSocketConnection mConnection = new WebSocketConnection();
@@ -90,6 +92,7 @@ public class ChatActivity extends AppCompatActivity
     }
 
     public void initialize() {
+        dbHelper = new CliperDbOpenHelper(getApplicationContext());
         initializeToken(); // this must comes first
         initializeServices();
         initializeClipboardListener();
@@ -117,52 +120,65 @@ public class ChatActivity extends AppCompatActivity
         }
     }
 
+    public void postAndDisplayMessage(final String message) {
+
+        try {
+            mConnection.connect(Constant.postUrl, new WebSocketHandler() {
+
+                @Override
+                public void onOpen() {
+                    JSONObject js = new JSONObject();
+                    try {
+                        js.put("token", globaltoken);
+                        js.put("data", message);
+                        //Toast.makeText(getApplicationContext(), js.get("data").toString(), Toast.LENGTH_LONG).show();
+
+                    } catch (JSONException e) {
+                        Toast.makeText(getApplicationContext(), "error in posting clipboard contents (pre)", Toast.LENGTH_LONG).show();
+                    }
+                    mConnection.sendTextMessage(js.toString());
+                }
+
+                @Override
+                public void onTextMessage(String payload) {
+                    try {
+                        JSONObject a = new JSONObject(payload);
+                        String msg = a.getString("msg");
+                        int code = a.getInt("code");
+                        Toast.makeText(getApplication(), "msg sent." +msg + code , Toast.LENGTH_LONG).show();
+                        CliperDbOpenHelper.insertMsg(true, message, dbHelper);
+                    } catch (JSONException e) {
+                        Toast.makeText(getApplication(), "Errors in sending msg." , Toast.LENGTH_LONG).show();
+                    }
+                }
+
+
+                @Override
+                public void onClose(int code, String reason) {
+                    Toast.makeText(getApplication(),"message send closed", Toast.LENGTH_LONG).show();
+                }
+            });
+        } catch (WebSocketException e) {
+            Toast.makeText(getApplication(), "Errors in buliding connection.", Toast.LENGTH_LONG).show();
+        }
+
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.setMessage(message);
+        chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+        chatMessage.setMe(true);
+
+        messageET.setText("");
+
+        displayMessage(chatMessage);
+    }
+
     public void initializeClipboardListener() {
         final ClipboardManager cb = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
         cb.addPrimaryClipChangedListener(new ClipboardManager.OnPrimaryClipChangedListener() {
             @Override
             public void onPrimaryClipChanged() {
                 //Toast.makeText(getApplicationContext(), cb.getPrimaryClip().toString(), Toast.LENGTH_LONG).show();
-
-                try {
-                    mConnection.connect(Constant.postUrl, new WebSocketHandler() {
-
-                        @Override
-                        public void onOpen() {
-                            JSONObject js = new JSONObject();
-                            try {
-                                js.put("token", globaltoken);
-                                js.put("data", cb.getPrimaryClip().getItemAt(0).getText());
-                                //Toast.makeText(getApplicationContext(), js.get("data").toString(), Toast.LENGTH_LONG).show();
-
-                            } catch (JSONException e) {
-                                Toast.makeText(getApplicationContext(), "error in posting clipboard contents (pre)", Toast.LENGTH_LONG).show();
-                            }
-                            mConnection.sendTextMessage(js.toString());
-                        }
-
-                        @Override
-                        public void onTextMessage(String payload) {
-                            try {
-                                JSONObject a = new JSONObject(payload);
-                                String msg = a.getString("msg");
-                                int code = a.getInt("code");
-                                Toast.makeText(getApplication(), "msg sent." +msg + code , Toast.LENGTH_LONG).show();
-                            } catch (JSONException e) {
-                                Toast.makeText(getApplication(), "Errors in sending msg." , Toast.LENGTH_LONG).show();
-                            }
-                        }
-
-
-                        @Override
-                        public void onClose(int code, String reason) {
-                            ;//Toast.makeText(getApplication(), "Connection lost.", Toast.LENGTH_LONG).show();
-                        }
-                    });
-                } catch (WebSocketException e) {
-                    Toast.makeText(getApplication(), "Errors in buliding connection.", Toast.LENGTH_LONG).show();
-                }
-
+                postAndDisplayMessage(cb.getPrimaryClip().getItemAt(0).getText().toString());
             }
         });
     }
@@ -198,9 +214,11 @@ public class ChatActivity extends AppCompatActivity
     public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Bundle bundle = intent.getExtras();
-            String syncmsg = bundle.getString("syncmsg");
-            Toast.makeText(getApplication(),syncmsg , Toast.LENGTH_LONG).show();
+            ChatMessage cm = (ChatMessage) intent.getSerializableExtra("syncmsg");
+            Log.i("syncmsg", cm.getMessage());
+            displayMessage(cm);
+//            String syncmsg = bundle.getString("syncmsg");
+//            Toast.makeText(getApplication(),syncmsg , Toast.LENGTH_LONG).show();
             //tsync.setText(syncmsg);
             /*try {
             JSONObject c = new JSONObject(count);
@@ -252,7 +270,7 @@ public class ChatActivity extends AppCompatActivity
 
         RelativeLayout container = (RelativeLayout) findViewById(R.id.container);
 
-        loadDummyHistory();
+        loadHistory();
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -262,14 +280,7 @@ public class ChatActivity extends AppCompatActivity
                     return;
                 }
 
-                ChatMessage chatMessage = new ChatMessage();
-                chatMessage.setMessage(messageText);
-                chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-                chatMessage.setMe(true);
-
-                messageET.setText("");
-
-                displayMessage(chatMessage);
+                postAndDisplayMessage(messageText);
             }
         });
 
@@ -286,20 +297,9 @@ public class ChatActivity extends AppCompatActivity
         messagesContainer.setSelection(messagesContainer.getCount() - 1);
     }
 
-    private void loadDummyHistory(){
+    private void loadHistory(){
 
-        chatHistory = new ArrayList<ChatMessage>();
-
-        ChatMessage msg = new ChatMessage();
-        msg.setMe(false);
-        msg.setMessage("Hi");
-        msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-        chatHistory.add(msg);
-        ChatMessage msg1 = new ChatMessage();
-        msg1.setMe(false);
-        msg1.setMessage("How are you doing???");
-        msg1.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-        chatHistory.add(msg1);
+        chatHistory = CliperDbOpenHelper.getAllMessages(dbHelper);
 
         adapter = new ChatAdapter(ChatActivity.this, new ArrayList<ChatMessage>());
         messagesContainer.setAdapter(adapter);

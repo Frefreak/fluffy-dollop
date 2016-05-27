@@ -29,7 +29,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.Scanner;
+
+import io.cliper.CliperDbOpenHelper;
 
 public class SyncService extends Service {
     private final WebSocketConnection mConnection = new WebSocketConnection();
@@ -122,10 +125,13 @@ public class SyncService extends Service {
                                         resp.put("status", "ok");
                                         mConnection.sendTextMessage(resp.toString());
                                         Intent intent=new Intent();
-                                        intent.putExtra("syncmsg","Data: " +msg + "\n" + "msgID: "+ msgId);
+                                        intent.putExtra("syncmsg", new ChatMessage(false, msg, new Date().toString()));
                                         intent.setAction("SyncService");
                                         sendBroadcast(intent);
                                         setClipboardContent(msg);
+
+                                        CliperDbOpenHelper dbHelper = new CliperDbOpenHelper(getApplicationContext());
+                                        CliperDbOpenHelper.insertMsg(false, msg, dbHelper);
                                     }
                                 }
                             } catch (JSONException e) {
