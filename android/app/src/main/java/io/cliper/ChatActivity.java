@@ -17,6 +17,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -197,9 +198,11 @@ public class ChatActivity extends AppCompatActivity
     public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Bundle bundle = intent.getExtras();
-            String syncmsg = bundle.getString("syncmsg");
-            Toast.makeText(getApplication(),syncmsg , Toast.LENGTH_LONG).show();
+            ChatMessage cm = (ChatMessage) intent.getSerializableExtra("syncmsg");
+            Log.i("syncmsg", cm.getMessage());
+            displayMessage(cm);
+//            String syncmsg = bundle.getString("syncmsg");
+//            Toast.makeText(getApplication(),syncmsg , Toast.LENGTH_LONG).show();
             //tsync.setText(syncmsg);
             /*try {
             JSONObject c = new JSONObject(count);

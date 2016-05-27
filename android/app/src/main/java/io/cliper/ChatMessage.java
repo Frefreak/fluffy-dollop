@@ -1,10 +1,12 @@
 package io.cliper;
 
 
+import java.io.Serializable;
+
 /**
  * Created by Zhe on 17-05-2016.
  */
-public class ChatMessage {
+public class ChatMessage implements Serializable {
     private boolean isMe;
     private String message;
     private String dateTime;
