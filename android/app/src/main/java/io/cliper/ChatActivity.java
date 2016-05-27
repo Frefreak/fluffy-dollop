@@ -93,6 +93,7 @@ public class ChatActivity extends AppCompatActivity
         initializeServices();
         initializeClipboardListener();
         registerBroadcastReceiver();
+
     }
 
     public void initializeToken() {
@@ -180,7 +181,7 @@ public class ChatActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case Constant.REQUEST_WRITE_EXTERNAL_STORAGE: {
-                if (grantResults.length > 0) {
+                if (grantResults[0] == 0) {
                     initialize();   // from ljt
                     initControls(); // from zxz
                 } else {    // user denied our permission request
