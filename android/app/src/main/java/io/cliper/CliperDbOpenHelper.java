@@ -47,7 +47,8 @@ public class CliperDbOpenHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_SOURCE, me?1:0);
         values.put(KEY_MSG, msg);
-        values.put(KEY_TIME, "temp");
+        values.put(KEY_TIME, new Date().toString());
         db.insert(CLIPER_TABLE_NAME, "null", values);
     }
+
 }
