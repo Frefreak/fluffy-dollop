@@ -5,19 +5,9 @@ package io.cliper;
  * Created by Zhe on 17-05-2016.
  */
 public class ChatMessage {
-    private long id;
     private boolean isMe;
     private String message;
-    private Long userId;
     private String dateTime;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public boolean getIsme() {
         return isMe;
@@ -33,14 +23,6 @@ public class ChatMessage {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
     }
 
     public String getDate() {

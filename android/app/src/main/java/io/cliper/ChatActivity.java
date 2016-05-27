@@ -17,6 +17,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -180,7 +181,7 @@ public class ChatActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case Constant.REQUEST_WRITE_EXTERNAL_STORAGE: {
-                if (grantResults.length > 0) {
+                if (grantResults[0] == 0) {
                     initialize();   // from ljt
                     initControls(); // from zxz
                 } else {    // user denied our permission request
@@ -262,7 +263,6 @@ public class ChatActivity extends AppCompatActivity
                 }
 
                 ChatMessage chatMessage = new ChatMessage();
-                chatMessage.setId(122);//dummy
                 chatMessage.setMessage(messageText);
                 chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
                 chatMessage.setMe(true);
@@ -291,13 +291,11 @@ public class ChatActivity extends AppCompatActivity
         chatHistory = new ArrayList<ChatMessage>();
 
         ChatMessage msg = new ChatMessage();
-        msg.setId(1);
         msg.setMe(false);
         msg.setMessage("Hi");
         msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
         chatHistory.add(msg);
         ChatMessage msg1 = new ChatMessage();
-        msg1.setId(2);
         msg1.setMe(false);
         msg1.setMessage("How are you doing???");
         msg1.setDate(DateFormat.getDateTimeInstance().format(new Date()));
