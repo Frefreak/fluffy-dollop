@@ -112,10 +112,11 @@ public class SyncService extends Service {
                                     // Then brocast the "connection established" message.
                                     if (msgId == "" && code ==200)
                                     {
-                                        Intent intent=new Intent();
-                                        intent.putExtra("syncmsg", "Connection established." +"\n"+ "Token: "+ synctoken);
-                                        intent.setAction("SyncService");
-                                        sendBroadcast(intent);
+                                        // temporarily disable this TODO
+//                                        Intent intent=new Intent();
+//                                        intent.putExtra("syncmsg", "Connection established." +"\n"+ "Token: "+ synctoken);
+//                                        intent.setAction("SyncService");
+//                                        sendBroadcast(intent);
                                     }
                                     // Second kind, the connect has been established and the server send msg automatically.
                                     // Then brocast the recived message and messageID.
