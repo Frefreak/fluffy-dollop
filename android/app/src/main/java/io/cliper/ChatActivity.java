@@ -17,7 +17,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -252,7 +251,7 @@ public class ChatActivity extends AppCompatActivity
 
         RelativeLayout container = (RelativeLayout) findViewById(R.id.container);
 
-        loadDummyHistory();
+        loadHistory();
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -286,20 +285,11 @@ public class ChatActivity extends AppCompatActivity
         messagesContainer.setSelection(messagesContainer.getCount() - 1);
     }
 
-    private void loadDummyHistory(){
+    private void loadHistory(){
 
-        chatHistory = new ArrayList<ChatMessage>();
+        CliperDbOpenHelper dbHelper = new CliperDbOpenHelper(getApplicationContext());
 
-        ChatMessage msg = new ChatMessage();
-        msg.setMe(false);
-        msg.setMessage("Hi");
-        msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-        chatHistory.add(msg);
-        ChatMessage msg1 = new ChatMessage();
-        msg1.setMe(false);
-        msg1.setMessage("How are you doing???");
-        msg1.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-        chatHistory.add(msg1);
+        chatHistory = CliperDbOpenHelper.getAllMessages(dbHelper);
 
         adapter = new ChatAdapter(ChatActivity.this, new ArrayList<ChatMessage>());
         messagesContainer.setAdapter(adapter);

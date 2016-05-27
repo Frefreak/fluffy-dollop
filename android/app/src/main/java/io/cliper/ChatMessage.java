@@ -9,6 +9,16 @@ public class ChatMessage {
     private String message;
     private String dateTime;
 
+    public ChatMessage(boolean a, String b, String c) {
+        this.isMe = a;
+        this.message = b;
+        this.dateTime = c;
+    }
+
+    public ChatMessage() {
+        super();
+    }
+
     public boolean getIsme() {
         return isMe;
     }
