@@ -51,7 +51,7 @@ public class PingService extends Service {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while (!synctoken.equals(" ")) {
+                while (!synctoken.equals("")) {
                     try {
                         mConnection.connect(Constant.pingUrl, new WebSocketHandler() {
                             @Override
