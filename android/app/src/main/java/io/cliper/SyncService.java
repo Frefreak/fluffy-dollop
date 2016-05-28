@@ -100,18 +100,25 @@ public class SyncService extends Service {
                         @Override
                         public void onTextMessage (String receive) {
                             try {
+                                Log.i("serverreturn", receive);
                                 JSONObject a = new JSONObject(receive);
                                 String msg = a.getString("msg");
                                 int code = a.optInt("code");
                                 String msgId = a.optString("msgid");
+                                Log.i("msgcodemsgId", msg + ' ' + code + ' ' + msgId);
                                 writeFile(msg);
                                 if (code == 0 && msgId == "") {
                                     throw new JSONException("server return bad json");
                                 } else {
                                     // First kind, the connect is established by sending tokne to server.
-                                    // Then brocast the "connection established" message.
-                                    if (msgId == "" && code ==200)
+                                    // Then broadcast the "connection established" message.
+                                    if (msgId == "")
                                     {
+                                        if (code == 200) { // success
+                                            ;
+                                        } else {
+                                            ;
+                                        }
                                         // temporarily disable this TODO
 //                                        Intent intent=new Intent();
 //                                        intent.putExtra("syncmsg", "Connection established." +"\n"+ "Token: "+ synctoken);
@@ -121,18 +128,22 @@ public class SyncService extends Service {
                                     // Second kind, the connect has been established and the server send msg automatically.
                                     // Then brocast the recived message and messageID.
                                     else {
-                                        JSONObject resp = new JSONObject();
-                                        resp.put("msgid", msgId);
-                                        resp.put("status", "ok");
-                                        mConnection.sendTextMessage(resp.toString());
-                                        Intent intent=new Intent();
-                                        intent.putExtra("syncmsg", new ChatMessage(false, msg, new Date().toString()));
-                                        intent.setAction("SyncService");
-                                        sendBroadcast(intent);
-                                        setClipboardContent(msg);
+                                        if (code == 200) { //success
+                                            JSONObject resp = new JSONObject();
+                                            resp.put("msgid", msgId);
+                                            resp.put("status", "ok");
+                                            mConnection.sendTextMessage(resp.toString());
+                                            Intent intent = new Intent();
+                                            intent.putExtra("syncmsg", new ChatMessage(false, msg, new Date().toString()));
+                                            intent.setAction("SyncService");
+                                            sendBroadcast(intent);
+                                            setClipboardContent(msg);
 
-                                        CliperDbOpenHelper dbHelper = new CliperDbOpenHelper(getApplicationContext());
-                                        CliperDbOpenHelper.insertMsg(false, msg, dbHelper);
+                                            CliperDbOpenHelper dbHelper = new CliperDbOpenHelper(getApplicationContext());
+                                            CliperDbOpenHelper.insertMsg(false, msg, dbHelper);
+                                        } else {
+                                            ;
+                                        }
                                     }
                                 }
                             } catch (JSONException e) {

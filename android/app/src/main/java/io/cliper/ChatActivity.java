@@ -122,6 +122,15 @@ public class ChatActivity extends AppCompatActivity
 
     public void postAndDisplayMessage(final String message) {
 
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.setMessage(message);
+        chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+        chatMessage.setMe(true);
+
+        messageET.setText("");
+
+        displayMessage(chatMessage);
+
         try {
             mConnection.connect(Constant.postUrl, new WebSocketHandler() {
 
@@ -146,7 +155,9 @@ public class ChatActivity extends AppCompatActivity
                         String msg = a.getString("msg");
                         int code = a.getInt("code");
                         Toast.makeText(getApplication(), "msg sent." +msg + code , Toast.LENGTH_LONG).show();
-                        CliperDbOpenHelper.insertMsg(true, message, dbHelper);
+                        if (code == 200) {
+                            CliperDbOpenHelper.insertMsg(true, message, dbHelper);
+                        }
                     } catch (JSONException e) {
                         Toast.makeText(getApplication(), "Errors in sending msg." , Toast.LENGTH_LONG).show();
                     }
@@ -162,14 +173,6 @@ public class ChatActivity extends AppCompatActivity
             Toast.makeText(getApplication(), "Errors in buliding connection.", Toast.LENGTH_LONG).show();
         }
 
-        ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setMessage(message);
-        chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-        chatMessage.setMe(true);
-
-        messageET.setText("");
-
-        displayMessage(chatMessage);
     }
 
     public void initializeClipboardListener() {
