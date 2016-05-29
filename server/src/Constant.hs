@@ -11,7 +11,7 @@ sqlErrorStr :: Text
 sqlErrorStr = "error while executing sql command"
 
 inactiveTimeToDelete :: NominalDiffTime
-inactiveTimeToDelete = 3600
+inactiveTimeToDelete = 24 * 3600
 
 peroidToClean :: Int
-peroidToClean = 3600 * 1000000 -- 24 * 3600 * 1000 -- 1 day
+peroidToClean = 24 * 3600 * 1000000 -- 24 * 3600 * 1000 -- 1 day
