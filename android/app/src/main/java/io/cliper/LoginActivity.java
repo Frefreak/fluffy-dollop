@@ -82,13 +82,8 @@ public class LoginActivity extends AppCompatActivity/* implements LoaderCallback
     private View mLoginFormView;
 
     //ljt
-    final String loginid = "ws://104.207.144.233:4564/login";
     private final WebSocketConnection mConnection = new WebSocketConnection();
     static String globaltoken ;
-    private final String tokenFile = "/cliper.token";
-    private final String sdcardPath = Environment.getExternalStorageDirectory().getPath();
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,7 +133,7 @@ public class LoginActivity extends AppCompatActivity/* implements LoaderCallback
     private void writefile(String fileinput){
         FileWriter fw =null;
         try{
-            File f = new File (sdcardPath + tokenFile);
+            File f = new File (Constant.tokenFileAbsPath);
             fw = new FileWriter(f,true);
         }catch(IOException e){
             e.printStackTrace();
@@ -196,7 +191,7 @@ public class LoginActivity extends AppCompatActivity/* implements LoaderCallback
             cancel = true;
         }
         try {
-            mConnection.connect(loginid, new WebSocketHandler() {
+            mConnection.connect(Constant.loginUrl, new WebSocketHandler() {
                 @Override
                 public void onOpen() {
                     JSONObject js = new JSONObject();
@@ -230,12 +225,12 @@ public class LoginActivity extends AppCompatActivity/* implements LoaderCallback
                                 globaltoken = temptoken;
                                 b.put("token", globaltoken);
                                 //writefile(globaltoken);
-                                PrintWriter writer = new PrintWriter(sdcardPath + tokenFile);
+                                PrintWriter writer = new PrintWriter(Constant.tokenFileAbsPath);
                                 writer.println(globaltoken+"\n");
                                 writer.close();
                                 Toast.makeText(getApplication(), "login successed" + " " + msg + " " + code, Toast.LENGTH_LONG).show();
                                 showProgress(false);
-                                Intent returnhome = new Intent(getApplicationContext(), MainActivity.class);
+                                Intent returnhome = new Intent(getApplicationContext(), ChatActivity.class);
                                 returnhome.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(returnhome);
                             } catch (FileNotFoundException e) {

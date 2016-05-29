@@ -128,6 +128,7 @@ performPostAction conn jp = do
     case mtokenMap of
         Just (Entity _ tokenmap) -> do
             respondPostMessage conn 200 ""
+            updateDatabaseTimestamp $ jptoken jp
             addMessageToToken (tokenMapUser tokenmap) (jptoken jp) (jpdata jp)
         Nothing -> respondPostMessage conn 422 "no such token"
 
@@ -189,6 +190,7 @@ appSync conn = do
                 Just _ -> do
                     respondSyncMessage conn 200 ""
                     forkPingThread conn 30
+                    updateDatabaseTimestamp (jstoken js)
                     sendMessagesOfToken (jstoken js) conn
                 Nothing -> respondSyncErrorMessage conn 422 "no such token"
 
@@ -234,6 +236,7 @@ sendMessagesOfToken token conn = do
                     Just (Just jsa) ->
                         if jsamsgid jsa == msgid && jsastatus jsa == "ok" then do
                             runSqlite sqlTable $ update mid [MessagePoolMessage =. tail msgq]
+                            updateDatabaseTimestamp token
                             sendMessagesOfToken token conn else
                                 sendMessagesOfToken token conn
                     Just Nothing -> logInvalidJson (fromJust d) >>

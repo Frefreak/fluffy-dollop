@@ -1,22 +1,24 @@
 package io.cliper;
 
 
+import java.io.Serializable;
+
 /**
  * Created by Zhe on 17-05-2016.
  */
-public class ChatMessage {
-    private long id;
+public class ChatMessage implements Serializable {
     private boolean isMe;
     private String message;
-    private Long userId;
     private String dateTime;
 
-    public long getId() {
-        return id;
+    public ChatMessage(boolean a, String b, String c) {
+        this.isMe = a;
+        this.message = b;
+        this.dateTime = c;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public ChatMessage() {
+        super();
     }
 
     public boolean getIsme() {
@@ -33,14 +35,6 @@ public class ChatMessage {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
     }
 
     public String getDate() {

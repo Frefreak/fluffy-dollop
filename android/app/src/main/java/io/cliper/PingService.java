@@ -25,17 +25,14 @@ import de.tavendo.autobahn.WebSocketHandler;
  */
 public class PingService extends Service {
 
-    private final String tokenFile = "/cliper.token";
-    private final String sdcardPath = Environment.getExternalStorageDirectory().getPath();
     private final WebSocketConnection mConnection = new WebSocketConnection();
-    final String Pingid = "ws://104.207.144.233:4564/ping";
     static String synctoken = "";
 
 
     //This function get token form tokenfilr to globaltoken1.
     void gettoken (){
         try {
-            Scanner in = new Scanner(new FileReader(sdcardPath + tokenFile));
+            Scanner in = new Scanner(new FileReader(Constant.tokenFileAbsPath));
             synctoken = in.nextLine();
         } catch (FileNotFoundException e) {
             ;
@@ -54,9 +51,9 @@ public class PingService extends Service {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while (!synctoken.equals(" ")) {
+                while (!synctoken.equals("")) {
                     try {
-                        mConnection.connect(Pingid, new WebSocketHandler() {
+                        mConnection.connect(Constant.pingUrl, new WebSocketHandler() {
                             @Override
                             public void onOpen() {
                                 JSONObject js = new JSONObject();

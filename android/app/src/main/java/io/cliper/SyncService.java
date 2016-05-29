@@ -8,10 +8,12 @@ package io.cliper;
  * receiving messages form server then transport the message to mainActivity. The messages are in Json format.
  * returning messages to server for receiving message successfully.
  * The recived Json message have to be decoded in this service。
- * This service transmit msg to mainactivity using a broadcast intent.
+ * This service transmit msg to ChatActivity using a broadcast intent.
  */
 
 import android.app.Service;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
@@ -27,21 +29,19 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.Scanner;
-import android.os.Environment;
+
+import io.cliper.CliperDbOpenHelper;
 
 public class SyncService extends Service {
-    private final String tokenFile = "/cliper.token";
-    private final String sdcardPath = Environment.getExternalStorageDirectory().getPath();
     private final WebSocketConnection mConnection = new WebSocketConnection();
-    final String syncid = "ws://104.207.144.233:4564/sync";
-    final String msgfile = "/clipermsg.txt";
     static String synctoken = "";
 
-    //This function get token form tokenfilr to globaltoken1.
+    //This function get token form tokenfile to globaltoken1.
     void gettoken (){
         try {
-            Scanner in = new Scanner(new FileReader(sdcardPath + tokenFile));
+            Scanner in = new Scanner(new FileReader(Constant.tokenFileAbsPath));
             synctoken = in.nextLine();
         } catch (FileNotFoundException e) {
             ;
@@ -49,17 +49,17 @@ public class SyncService extends Service {
         }
     }
 
-    private void writefile(String fileinput){
+    private void writeFile(String fileinput){
         FileWriter fw =null;
         try{
-            File f = new File (sdcardPath + msgfile);
+            File f = new File (Constant.msgFileAbsPath);
             fw = new FileWriter(f,true);
         }catch(IOException e){
             e.printStackTrace();
         }
         PrintWriter pw = new PrintWriter(fw);
         pw.println(fileinput);
-        pw.flush();;
+        pw.flush();
         try{
             fw.flush();
             pw.close();
@@ -84,7 +84,7 @@ public class SyncService extends Service {
             @Override
             public void run() {
                 try {
-                    mConnection.connect(syncid, new WebSocketHandler() {
+                    mConnection.connect(Constant.syncUrl, new WebSocketHandler() {
                         @Override
                         public void onOpen() {
                             JSONObject js = new JSONObject();
@@ -100,34 +100,50 @@ public class SyncService extends Service {
                         @Override
                         public void onTextMessage (String receive) {
                             try {
+                                Log.i("serverreturn", receive);
                                 JSONObject a = new JSONObject(receive);
                                 String msg = a.getString("msg");
                                 int code = a.optInt("code");
                                 String msgId = a.optString("msgid");
-                                writefile(msg);
+                                Log.i("msgcodemsgId", msg + ' ' + code + ' ' + msgId);
+                                writeFile(msg);
                                 if (code == 0 && msgId == "") {
                                     throw new JSONException("server return bad json");
                                 } else {
                                     // First kind, the connect is established by sending tokne to server.
-                                    // Then brocast the "connection established" message.
-                                    if (msgId == "" && code ==200)
+                                    // Then broadcast the "connection established" message.
+                                    if (msgId == "")
                                     {
-                                        Intent intent=new Intent();
-                                        intent.putExtra("syncmsg", "Connection established." +"\n"+ "Token: "+ synctoken);
-                                        intent.setAction("SyncService");
-                                        sendBroadcast(intent);
+                                        if (code == 200) { // success
+                                            ;
+                                        } else {
+                                            ;
+                                        }
+                                        // temporarily disable this TODO
+//                                        Intent intent=new Intent();
+//                                        intent.putExtra("syncmsg", "Connection established." +"\n"+ "Token: "+ synctoken);
+//                                        intent.setAction("SyncService");
+//                                        sendBroadcast(intent);
                                     }
                                     // Second kind, the connect has been established and the server send msg automatically.
                                     // Then brocast the recived message and messageID.
                                     else {
-                                        JSONObject resp = new JSONObject();
-                                        resp.put("msgid", msgId);
-                                        resp.put("status", "ok");
-                                        mConnection.sendTextMessage(resp.toString());
-                                        Intent intent=new Intent();
-                                        intent.putExtra("syncmsg","Data: " +msg + "\n" + "msgID: "+ msgId);
-                                        intent.setAction("SyncService");
-                                        sendBroadcast(intent);
+                                        if (code == 200) { //success
+                                            JSONObject resp = new JSONObject();
+                                            resp.put("msgid", msgId);
+                                            resp.put("status", "ok");
+                                            mConnection.sendTextMessage(resp.toString());
+                                            Intent intent = new Intent();
+                                            intent.putExtra("syncmsg", new ChatMessage(false, msg, new Date().toString()));
+                                            intent.setAction("SyncService");
+                                            sendBroadcast(intent);
+                                            setClipboardContent(msg);
+
+                                            CliperDbOpenHelper dbHelper = new CliperDbOpenHelper(getApplicationContext());
+                                            CliperDbOpenHelper.insertMsg(false, msg, dbHelper);
+                                        } else {
+                                            ;
+                                        }
                                     }
                                 }
                             } catch (JSONException e) {
@@ -156,6 +172,10 @@ public class SyncService extends Service {
     }
 
 
+    public void setClipboardContent(String s) {
+        ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        cm.setPrimaryClip(ClipData.newPlainText("", s));
+    }
 
 
     @Override
