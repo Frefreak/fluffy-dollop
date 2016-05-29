@@ -53,7 +53,7 @@
           <li .list-group-item><a>Linux</a>
           <li .list-group-item><a>Mac Os</a>
         <br>
-        <p .text-xs-center>Other platforms' client can be easily wrote using
+        <p .text-xs-center>Other platforms' clients can be easily wrote using
             \ our <a>api</a>.
 
 ^{footerTemplate}
