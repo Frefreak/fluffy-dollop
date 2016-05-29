@@ -1,0 +1,16 @@
+{
+	"manifest_version": 2,
+	"name": "Cliper",
+	"version": "0.1",
+	"description": "Cliper - Clipboard sharing utility (chrome plugin)",
+	"browser_action": {
+		"default_icon": "icon.png",
+		"default_popup": "popup.html"
+	},
+	"permissions": [
+		"contextMenus"
+	],
+	"background": {
+		"scripts": ["background.js"]
+	}
+}
