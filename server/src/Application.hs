@@ -44,7 +44,7 @@ cliperServer = homeServer
         :<|> postPostServer
         :<|> staticServer
 
-homeServer ::Handler Html
+homeServer :: Handler Html
 homeServer = return homeTemplate
 
 loginPostServer :: J.JWebAuth -> Handler Value
@@ -85,7 +85,7 @@ tokenServer :: T.Text -> Handler Html
 tokenServer token = do
     r <- liftIO $ runSqlite sqlTable $ selectFirst [TokenMapToken ==. token] []
     case r of
-        Nothing -> left err404
+        Nothing -> throwError err404
         Just (Entity _ _) -> return tokensTemplate
 
 postPostServer :: J.JPost -> Handler Value

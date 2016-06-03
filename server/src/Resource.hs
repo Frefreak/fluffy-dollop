@@ -15,7 +15,7 @@ import Servant
 import JSON
 import Types
 
-type Handler = EitherT ServantErr IO
+{-type Handler = EitherT ServantErr IO-}
 
 homeTemplate :: Html
 homeTemplate = $(shamletFile "templates/home.hamlet")
