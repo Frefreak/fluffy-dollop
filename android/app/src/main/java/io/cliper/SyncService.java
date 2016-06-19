@@ -128,7 +128,9 @@ public class SyncService extends Service {
                                     // Second kind, the connect has been established and the server send msg automatically.
                                     // Then brocast the recived message and messageID.
                                     else {
-                                        if (code == 200) { //success
+//                                        if (code == 200) { //success
+                                            CliperDbOpenHelper dbHelper = new CliperDbOpenHelper(getApplicationContext());
+                                            CliperDbOpenHelper.insertMsg(false, msg, dbHelper);
                                             JSONObject resp = new JSONObject();
                                             resp.put("msgid", msgId);
                                             resp.put("status", "ok");
@@ -137,13 +139,11 @@ public class SyncService extends Service {
                                             intent.putExtra("syncmsg", new ChatMessage(false, msg, new Date().toString()));
                                             intent.setAction("SyncService");
                                             sendBroadcast(intent);
-                                            setClipboardContent(msg);
+//                                            setClipboardContent(msg);
 
-                                            CliperDbOpenHelper dbHelper = new CliperDbOpenHelper(getApplicationContext());
-                                            CliperDbOpenHelper.insertMsg(false, msg, dbHelper);
-                                        } else {
-                                            ;
-                                        }
+//                                        } else {
+//                                            ;
+//                                        }
                                     }
                                 }
                             } catch (JSONException e) {
