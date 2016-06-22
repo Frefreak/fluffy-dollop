@@ -30,8 +30,9 @@ In folder **chrome**.
 4. The extension should have be loaded. Currently only `post`, `login` and `register` are implemented.
 
 # TODO
-- create a simple web interface on server side
-- polish simple web interface with some css
+- ~~create a simple web interface on server side~~
+- ~~polish simple web interface with some css~~
 - release some binary (probably try Travis CI for deploy apk)
-- create a simple chrome extension to right click and post to server (if have time).
-- change `ping` format which require token, so server can detect inactive token and erase it itself (similar to perform a `logout`)
+- ~~create a simple chrome extension to right click and post to server (if have time)~~
+- ~~change `ping` format which require token, so server can detect inactive token and erase it itself (similar to perform a `logout`)~~
+- make android client more stable (bug fixes)
