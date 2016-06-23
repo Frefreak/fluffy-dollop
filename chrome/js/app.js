@@ -18,6 +18,8 @@ function ajaxLogin(username, password) {
         if (json.msg == "" && json.code == 200) {
           alert("login successfully");
           chrome.storage.sync.set({'token': json.token});
+          page = chrome.extension.getBackgroundPage();
+          page.startSync();
           window.close();
         } else {
           alert(json.code + ": " + json.msg);
@@ -56,3 +58,9 @@ function ajaxRegister(username, password) {
     }
   });
 }
+
+$('#resync').on('click', function() {
+  page = chrome.extension.getBackgroundPage();
+  page.startSync();
+  window.close();
+});
