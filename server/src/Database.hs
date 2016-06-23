@@ -9,7 +9,6 @@ module Database where
 
 import Database.Persist
 import Database.Persist.TH
-import Database.Persist.Sql
 import Control.Monad.IO.Class (liftIO)
 import Data.Text (Text)
 import Data.Time.Clock
