@@ -31,7 +31,7 @@ In folder **chrome**.
 
 **Note**: Syncing (No `alert`) is implicit to be called after login and
 everytime the plugin reloaded. The `reSync` in popup menu is used only when
-you find the connection might be lost, and no `alert`.
+you find the connection might has been lost.
 
 # TODO
 - ~~create a simple web interface on server side~~
