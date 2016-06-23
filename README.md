@@ -29,6 +29,10 @@ In folder **chrome**.
 3. Click `Load unpacked extension` button, navigate to select the **chrome** folder.
 4. The extension should have be loaded. Currently only `post`, `login` and `register` are implemented.
 
+**Note**: Syncing (No `alert`) is implicit to be called after login and
+everytime the plugin reloaded. The `reSync` in popup menu is used only when
+you find the connection might be lost, and no `alert`.
+
 # TODO
 - ~~create a simple web interface on server side~~
 - ~~polish simple web interface with some css~~
